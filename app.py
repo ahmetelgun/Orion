@@ -20,13 +20,12 @@ def login():
     user = is_login(request, session)
     if user:
         return jsonify({"login": True, "token": user.token}), 200
-
     try:
         content = request.json
         username = html.escape(content["username"])
         password = content["password"]
-    except:
-        return jsonify({"login": False, "message": "invalid username or password"}), 400
+    except:  # if username or password not exist in request
+        return jsonify({"login": False, "message": "invalid username or password"}), 401
 
     user = session.query(Author).filter_by(username=username).first()
     if user:
@@ -35,7 +34,7 @@ def login():
             token = create_token(user.username, expiration_time)
             set_token_to_user(user, token, session)
             return jsonify({"login": True, "token": token}), 200
-    return jsonify({"login": False, "message": "invalid username or password"}), 400
+    return jsonify({"login": False, "message": "invalid username or password"}), 401
 
 
 @app.route('/logout', methods=["POST"])
@@ -51,15 +50,14 @@ def logout():
 @app.route('/posts', methods=["GET"])
 def posts():
     total_number_of_page = 1
-    posts_per_page = 3
     postslist = []
-
     tag = request.args.get('tag', default=None, type=str)
     if tag:
         tag = session.query(Tag).filter_by(name=tag).first()
         if tag:  # if tag from query string exists on database
-            posts = session.query(Post, Author.name).filter(
-                and_(Author.id == Post.author_id, Post.tags.contains(tag))).group_by(Post).order_by(Post.published_date.desc()).all()
+            posts = session.query(Post, Author.name, Author.username)\
+                .filter(and_(Author.id == Post.author_id, Post.tags.contains(tag)))\
+                .group_by(Post).order_by(Post.published_date.desc()).all()
         else:
             return jsonify({"message": "tag not found"}), 404
     else:  # if not tag query in query string
@@ -77,12 +75,13 @@ def posts():
         currentpage = page
     else:
         currentpage = 1
-
-    for post, author_name, author_username in posts[currentpage*posts_per_page-posts_per_page: currentpage*posts_per_page]:
+    for post, author_name, author_username, qqqq in posts[currentpage*posts_per_page-posts_per_page: currentpage*posts_per_page]:
         post = post.__dict__
         post['author_name'] = author_name
         post['author_username'] = author_username
         post.pop('_sa_instance_state', None)
+        post['published_date'] = post['published_date'].strftime(
+            '%Y-%m-%d-%H-%M')
         post.pop('text')
         postslist.append(post)
     return jsonify({"posts": postslist, "total_number_of_page": total_number_of_page, "currentpage": currentpage})
