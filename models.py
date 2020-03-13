@@ -58,6 +58,9 @@ class Tag(Base):
     posts = relationship(
         "Post", secondary=link, back_populates="tags")
 
+    def __repr__(self):
+        return repr({'id': self.id, 'name': self.name})
+
 
 if __name__ == "__main__":
     create_database(database_url)
