@@ -20,7 +20,7 @@ def create_token(username, expiration_time):
 
 def is_login(request, session):
     try:
-        token = request.headers.get("Authorization").split(" ")[1]
+        token = request.cookies.get("token")
         decoded = jwt.decode(token, SECRET_KEY, algorithms=['HS256'])
         username = decoded['username']
         expiration_time = datetime.datetime.fromtimestamp(decoded['exp'])

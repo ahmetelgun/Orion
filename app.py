@@ -17,7 +17,8 @@ session = Session()
 
 def make_response_with_token(body, token):
     resp = jsonify(body)
-    resp.headers['Authorization'] = "Bearer " + token
+    resp.set_cookie("token", token, secure=True,
+                    httponly=True, samesite='Strict')
     return resp
 
 
