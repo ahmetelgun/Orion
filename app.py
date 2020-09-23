@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, make_response
 from sqlalchemy import create_engine, and_
 from sqlalchemy.orm import sessionmaker
 from models import Post, Author, Tag
@@ -15,25 +15,32 @@ Session = sessionmaker(bind=engine)
 session = Session()
 
 
+def make_response_with_token(body, token):
+    resp = jsonify(body)
+    resp.headers['Authorization'] = "Bearer " + token
+    return resp
+
+
 @app.route('/login', methods=["POST"])
 def login():
     user = is_login(request, session)
     if user:
-        return jsonify({"login": True, "token": user.token}), 200
+        resp = make_response_with_token({"login": True}, user.token)
+        return resp, 200
     try:
         content = request.json
         username = html.escape(content["username"])
         password = content["password"]
     except:  # if username or password not exist in request
         return jsonify({"login": False, "message": "invalid username or password"}), 401
-
     user = session.query(Author).filter_by(username=username).first()
     if user:
         if check_password_hash(user.password, password):
             expiration_time = datetime.datetime.now() + datetime.timedelta(days=1)
             token = create_token(user.username, expiration_time)
             set_token_to_user(user, token, session)
-            return jsonify({"login": True, "token": token}), 200
+            resp = make_response_with_token({"login": True}, token)
+            return resp, 200
     return jsonify({"login": False, "message": "invalid username or password"}), 401
 
 
