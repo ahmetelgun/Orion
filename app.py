@@ -8,22 +8,24 @@ import datetime
 from auth import set_token_to_user, create_token, is_login
 import html
 
-engine = create_engine(database_url)
-
 app = Flask(__name__)
-Session = sessionmaker(bind=engine)
-session = Session()
+
+def create_session(engine):
+    global session
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    return session
 
 
 def make_response_with_token(body, token):
     resp = jsonify(body)
-    resp.set_cookie("token", token, secure=True,
-                    httponly=True, samesite='Strict')
+    resp.set_cookie("token", token, secure=True, httponly=True, samesite='Strict')
     return resp
 
 
 @app.route('/login', methods=["POST"])
 def login():
+    global session
     user = is_login(request, session)
     if user:
         resp = make_response_with_token({"login": True}, user.token)
@@ -41,7 +43,7 @@ def login():
             token = create_token(user.username, expiration_time)
             set_token_to_user(user, token, session)
             resp = make_response_with_token({"login": True}, token)
-            return resp, 200
+            return resp, 200 
     return jsonify({"login": False, "message": "invalid username or password"}), 401
 
 
@@ -52,7 +54,9 @@ def logout():
         user.token = ""
         session.add(user)
         session.commit()
-    return jsonify({"message": "logout successfull"}), 200
+        res = make_response_with_token({"logout": True}, "")
+        return res, 200
+    return jsonify({"logout": False}), 200
 
 
 @app.route('/posts', methods=["GET"])
@@ -175,5 +179,7 @@ def addtag():
 
 
 if __name__ == '__main__':
+    engine = create_engine(database_url)
+    create_session(engine)
     app.debug = True
     app.run()
