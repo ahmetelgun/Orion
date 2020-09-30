@@ -169,12 +169,12 @@ def addtag():
         tag_name = content['tag_name']
     except:
         return jsonify({"message": "tag name is invalid"}), 400
-    try:
-        tag = Tag(name=tag_name)
-        session.add(tag)
-        session.commit()
-    except:
+    tag = session.query(Tag).filter_by(name=tag_name).first()
+    if tag:
         return jsonify({"message": "tag is exist"}), 409
+    tag = Tag(name=tag_name)
+    session.add(tag)
+    session.commit()
     return jsonify({"message": "tag is added"}), 200
 
 
