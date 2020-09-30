@@ -159,7 +159,7 @@ def addpost():
     return jsonify({"message": "post added"}), 200
 
 
-@app.route('/addtag', methods=["POST"])
+@app.route('/createtag', methods=["POST"])
 def addtag():
     user = is_login(request, session)
     if not user:
