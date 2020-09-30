@@ -147,7 +147,7 @@ def addpost():
                 text=post_text, excerpt=post_excerpt)
     try:
         tags = set([session.query(Tag)
-                    .filter_by(id=i).first() for i in content['tags']])
+                    .filter_by(name=i).first() for i in content['tags']])
         for tag in tags:
             if tag:
                 post.tags.append(tag)
