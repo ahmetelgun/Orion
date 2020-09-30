@@ -130,7 +130,7 @@ def taglist():
     return jsonify(tags), 200
 
 
-@app.route('/addpost', methods=["POST"])
+@app.route('/createpost', methods=["POST"])
 def addpost():
     user = is_login(request, session)
     if not user:
