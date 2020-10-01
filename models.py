@@ -41,6 +41,7 @@ class Post(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
     published_date = Column(DateTime, nullable=False)
+    endpoint = Column(String, nullable=False, primary_key=True)
     text = Column(String, nullable=False)
     excerpt = Column(String, nullable=False)
     author_id = Column(Integer, ForeignKey('authors.id'))
@@ -55,6 +56,7 @@ class Tag(Base):
 
     id = Column(Integer, primary_key=True)
     name = Column(String, unique=True, nullable=False)
+    endpoint = Column(String, nullable=False, primary_key=True)
     posts = relationship(
         "Post", secondary=link, back_populates="tags")
 
