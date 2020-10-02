@@ -3,10 +3,17 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 from config import database_url
+from sqlalchemy.orm import sessionmaker
 
 from werkzeug.security import generate_password_hash, check_password_hash
 
 Base = declarative_base()
+
+
+def create_session(engine):
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    return session
 
 
 def create_database(database_url):
@@ -41,7 +48,7 @@ class Post(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
     published_date = Column(DateTime, nullable=False)
-    endpoint = Column(String, nullable=False, primary_key=True)
+    endpoint = Column(String, nullable=False, unique=True)
     text = Column(String, nullable=False)
     excerpt = Column(String, nullable=False)
     author_id = Column(Integer, ForeignKey('authors.id'))
@@ -56,7 +63,6 @@ class Tag(Base):
 
     id = Column(Integer, primary_key=True)
     name = Column(String, unique=True, nullable=False)
-    endpoint = Column(String, nullable=False, primary_key=True)
     posts = relationship(
         "Post", secondary=link, back_populates="tags")
 
