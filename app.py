@@ -1,25 +1,22 @@
 from flask import Flask, request, jsonify, make_response
 from sqlalchemy import create_engine, and_
-from sqlalchemy.orm import sessionmaker
 from models import Post, Author, Tag
 from config import database_url, posts_per_page
 from werkzeug.security import check_password_hash
 import datetime
 from auth import set_token_to_user, create_token, is_login
 import html
-
+import string
+import random
+from sqlalchemy import func
+from models import create_session
 app = Flask(__name__)
-
-def create_session(engine):
-    global session
-    Session = sessionmaker(bind=engine)
-    session = Session()
-    return session
 
 
 def make_response_with_token(body, token):
     resp = jsonify(body)
-    resp.set_cookie("token", token, secure=True, httponly=True, samesite='Strict')
+    resp.set_cookie("token", token, secure=True,
+                    httponly=True, samesite='Strict')
     return resp
 
 
@@ -43,7 +40,7 @@ def login():
             token = create_token(user.username, expiration_time)
             set_token_to_user(user, token, session)
             resp = make_response_with_token({"login": True}, token)
-            return resp, 200 
+            return resp, 200
     return jsonify({"login": False, "message": "invalid username or password"}), 401
 
 
@@ -100,22 +97,17 @@ def posts():
 
 @app.route('/<int:year>/<int:month>/<int:day>/<string:name>')
 def post(year, month, day, name):
-    date = datetime.datetime(year, month, day, 0, 0)
-    after_date = date + datetime.timedelta(days=1)
-    posts = session.query(Post).filter(
-        and_(Post.published_date < after_date, Post.published_date >= date)).all()
-
-    for i in posts:
-        lower = i.name.strip().replace(" ", "-").lower()
-        if name == lower:
-            res = i.__dict__
-            tags = [tag.__dict__ for tag in i.tags]
-            for tag in tags:
-                tag.pop('_sa_instance_state', None)
-            res['tags'] = tags
-            res.pop('_sa_instance_state', None)
-            res.pop('excerpt')
-            return jsonify(res), 200
+    endpoint = f"/{year}/{month}/{day}/{name}"
+    post = session.query(Post).filter_by(endpoint=endpoint).first()
+    if post:
+        res = post.__dict__
+        tags = [tag.__dict__ for tag in post.tags]
+        for tag in tags:
+            tag.pop('_sa_instance_state', None)
+        res['tags'] = tags
+        res.pop('_sa_instance_state', None)
+        res.pop('excerpt')
+        return jsonify(res), 200
     return jsonify({"message": "post not found"}), 404
 
 
@@ -141,10 +133,15 @@ def addpost():
         post_text = content["post_text"]
     except:
         return jsonify({"message": "post name or post body is invalid"}), 400
-    post_excerpt = post_text[:50]
     published_date = datetime.datetime.now()
+    endpoint = f"/{published_date.year}/{published_date.month}/{published_date.day}/{'-'.join(post_name.split()).lower()}"
+    temp_endpoint = endpoint
+    while len(session.query(Post).filter_by(endpoint=temp_endpoint).all()) > 0:
+        temp_endpoint = endpoint + "-" + \
+            "".join(random.choices(string.ascii_lowercase, k=4))
+    post_excerpt = post_text[:50]
     post = Post(name=post_name, published_date=published_date,
-                text=post_text, excerpt=post_excerpt)
+                text=post_text, excerpt=post_excerpt, endpoint=temp_endpoint)
     try:
         tags = set([session.query(Tag)
                     .filter_by(name=i).first() for i in content['tags']])
@@ -169,9 +166,9 @@ def addtag():
         tag_name = content['tag_name']
     except:
         return jsonify({"message": "tag name is invalid"}), 400
-    tag = session.query(Tag).filter_by(name=tag_name).first()
+    tag = session.query(Tag).filter(func.lower(Tag.name) == tag_name).first()
     if tag:
-        return jsonify({"message": "tag is exist"}), 409
+        return jsonify({"message": "tag is exist"}), 40
     tag = Tag(name=tag_name)
     session.add(tag)
     session.commit()
@@ -179,7 +176,8 @@ def addtag():
 
 
 if __name__ == '__main__':
+    global session
     engine = create_engine(database_url)
-    create_session(engine)
+    session = create_session(engine)
     app.debug = True
     app.run()
