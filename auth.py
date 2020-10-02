@@ -1,9 +1,11 @@
 import jwt
 import datetime
-from models import Author
+from models import Author, create_session
 from config import SECRET_KEY
 from werkzeug.security import generate_password_hash
 import html
+from sqlalchemy import create_engine
+from config import database_url
 
 
 def set_token_to_user(user, token, session):
@@ -66,3 +68,13 @@ def register_user(session, name=None, username=None, password=None):
     session.commit()
     print("user is created")
     return user
+
+
+if __name__ == "__main__":
+    engine = create_engine(database_url)
+    session = create_session(engine)
+
+    name = input("name: ")
+    username = input("username: ")
+    password = input("password: ")
+    register_user(session, name=name, username=username, password=password)
