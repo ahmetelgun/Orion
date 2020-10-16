@@ -102,23 +102,23 @@ class PostsEndpointTestCase(unittest.TestCase):
         self.assertEqual(res['current_page'], 1)
         self.assertEqual(res['total_number_of_page'], 2)
         self.assertEqual(res['posts'][0], {'author': 'ahmet', 'author_id': 1, 'excerpt': 'post3 excerpt', 'id': 3,
-                                           'name': 'post3', 'published_date': '2020-07-25-05-23', 'tags': [], 'endpoint': '/2020/7/25/post3'})
+                                           'name': 'post3', 'published_date': '25.07.2020', 'tags': [], 'endpoint': '/2020/7/25/post3'})
         self.assertEqual(res['posts'][1], {'author': 'ahmet', 'author_id': 1, 'endpoint': '/2020/6/1/post2', 'excerpt': 'post2 excerpt',
-                                           'id': 2, 'name': 'post2', 'published_date': '2020-06-01-12-16', 'tags': [{'id': 2, 'name': 'tag2'}]})
+                                           'id': 2, 'name': 'post2', 'published_date': '01.06.2020', 'tags': [{'id': 2, 'name': 'tag2'}]})
         c = app.app.test_client()
         res = c.get("/posts?page=2").json
         self.assertEqual(res['current_page'], 2)
         self.assertEqual(res['total_number_of_page'], 2)
         self.assertEqual(res['posts'][0], {'author': 'ahmet', 'author_id': 1, 'endpoint': '/2020/5/7/post1', 'excerpt': 'post1 excerpt',
-                                           'id': 1, 'name': 'post1', 'published_date': '2020-05-07-15-42', 'tags': [{'id': 1, 'name': 'tag1'}, {'id': 2, 'name': 'tag2'}]})
+                                           'id': 1, 'name': 'post1', 'published_date': '07.05.2020', 'tags': [{'id': 1, 'name': 'tag1'}, {'id': 2, 'name': 'tag2'}]})
         c = app.app.test_client()
         res = c.get("/posts?tag=tag2").json
         self.assertEqual(res['current_page'], 1)
         self.assertEqual(res['total_number_of_page'], 1)
         self.assertEqual(res['posts'][0], {'author': 'ahmet', 'author_id': 1, 'endpoint': '/2020/6/1/post2', 'excerpt': 'post2 excerpt',
-                                           'id': 2, 'name': 'post2', 'published_date': '2020-06-01-12-16', 'tags': [{'id': 2, 'name': 'tag2'}]})
+                                           'id': 2, 'name': 'post2', 'published_date': '01.06.2020', 'tags': [{'id': 2, 'name': 'tag2'}]})
         self.assertEqual(res['posts'][1], {'author': 'ahmet', 'author_id': 1, 'endpoint': '/2020/5/7/post1', 'excerpt': 'post1 excerpt',
-                                           'id': 1, 'name': 'post1', 'published_date': '2020-05-07-15-42', 'tags': [{'id': 1, 'name': 'tag1'}, {'id': 2, 'name': 'tag2'}]})
+                                           'id': 1, 'name': 'post1', 'published_date': '07.05.2020', 'tags': [{'id': 1, 'name': 'tag1'}, {'id': 2, 'name': 'tag2'}]})
         c = app.app.test_client()
         res = c.get("/posts?tag=notexisttag").json
         self.assertEqual(res, {'message': 'tag not found'})
@@ -134,11 +134,11 @@ class GetPostEndpointTestCase(unittest.TestCase):
         c = app.app.test_client()
         res = c.get("/2020/07/25/post3").json
         self.assertEqual(res, {'author_id': 1, 'endpoint': '/2020/7/25/post3', 'id': 3, 'name': 'post3',
-                               'published_date': 'Sat, 25 Jul 2020 05:23:00 GMT', 'tags': [], 'text': 'post3 text'})
+                               'published_date': '25.07.2020', 'tags': [], 'text': 'post3 text'})
         c = app.app.test_client()
         res = c.get("/2020/06/01/post2").json
         self.assertEqual(res, {'author_id': 1, 'endpoint': '/2020/6/1/post2', 'id': 2, 'name': 'post2',
-                               'published_date': 'Mon, 01 Jun 2020 12:16:00 GMT', 'tags': [{'id': 2, 'name': 'tag2'}], 'text': 'post2 text'})
+                               'published_date': '01.06.2020', 'tags': [{'id': 2, 'name': 'tag2'}], 'text': 'post2 text'})
 
 
 class TagListEndpointTestCase(unittest.TestCase):
