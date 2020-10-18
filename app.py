@@ -89,7 +89,7 @@ def posts():
         post['tags'] = taglist
         post.pop('_sa_instance_state', None)
         post['published_date'] = post['published_date']\
-            .strftime('%Y-%m-%d-%H-%M')
+            .strftime('%d.%m.%Y')
         post.pop('text')
         postslist.append(post)
     return jsonify({"posts": postslist, 'current_page': current_page, 'total_number_of_page': total_number_of_page})
@@ -105,6 +105,8 @@ def post(year, month, day, name):
         for tag in tags:
             tag.pop('_sa_instance_state', None)
         res['tags'] = tags
+        res['published_date'] = res['published_date']\
+            .strftime('%d.%m.%Y')
         res.pop('_sa_instance_state', None)
         res.pop('excerpt')
         return jsonify(res), 200
