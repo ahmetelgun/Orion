@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify, make_response
 from sqlalchemy import create_engine, and_
-from models import Post, Author, Tag
+from models import Post, Author, Tag, CustomPage
 from config import database_url, posts_per_page
 from werkzeug.security import check_password_hash
 import datetime
@@ -170,11 +170,43 @@ def addtag():
         return jsonify({"message": "tag name is invalid"}), 400
     tag = session.query(Tag).filter(func.lower(Tag.name) == tag_name).first()
     if tag:
-        return jsonify({"message": "tag is exist"}), 40
+        return jsonify({"message": "tag is exist"}), 409
     tag = Tag(name=tag_name)
     session.add(tag)
     session.commit()
     return jsonify({"message": "tag is added"}), 200
+
+# for custom pages like about, contact
+@app.route('/<string:custom>', methods=["GET"])
+def customPages(custom):
+    page = session.query(CustomPage).filter_by(endpoint=f"/{custom}").first()
+    if page:
+        res = page.__dict__
+        res.pop('_sa_instance_state', None)
+        return jsonify(res), 200
+    return jsonify({"message": "page not found"}), 404
+
+
+@app.route('/createcustompage', methods=["POST"])
+def createCustomPage():
+    user = is_login(request, session)
+    if not user:
+        return jsonify({"login": False, "message": "unauthorized request"}), 401
+    try:
+        content = request.json
+        page_name = html.escape(content["name"])
+        page_text = content["text"]
+        page_endpoint = content["endpoint"]
+    except:
+        return jsonify({"message": "page name, text or endpoint is invalid"}), 400
+    page_exist = session.query(CustomPage).filter_by(
+        endpoint=page_endpoint).first()
+    if page_exist:
+        return jsonify({"message": "page is exist"}), 409
+    page = CustomPage(name=page_name, text=page_text, endpoint=page_endpoint)
+    session.add(page)
+    session.commit()
+    return jsonify({"message": "page added"}), 200
 
 
 if __name__ == '__main__':

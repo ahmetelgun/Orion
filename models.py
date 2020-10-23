@@ -70,5 +70,14 @@ class Tag(Base):
         return repr({'id': self.id, 'name': self.name})
 
 
+class CustomPage(Base):
+    __tablename__ = 'customPage'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String, nullable=False)
+    endpoint = Column(String, nullable=False, unique=True)
+    text = Column(String, nullable=False)
+
+
 if __name__ == "__main__":
     create_database(database_url)
