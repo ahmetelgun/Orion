@@ -15,82 +15,92 @@ import datetime
 
 def create_db():
     global session
-    global user
+    global user1
+    global user2
     engine = create_engine("sqlite:///:memory:")
     Base.metadata.create_all(engine)
     session = app.create_session(engine)
     app.session = session
-    user = register_user(session, name="ahmet",
-                         username="a", password="12345678")
+    user1 = register_user(session, name="ahmet",
+                          username="a", password="12345678")
+    user2 = register_user(session, name="mehmet",
+                          username="m", password="12345678")
     tag1 = Tag(name="tag1")
     tag2 = Tag(name="tag2")
-    post1 = Post(name="post1", published_date=datetime.datetime(2020, 5, 7, 15, 42, 0, 0),
-                 text="post1 text", excerpt="post1 excerpt", endpoint="/2020/5/7/post1")
+
+    post1 = Post(name="post1", published_date=datetime.datetime(2019, 5, 7, 15, 42, 0, 0),
+                 text="post1 text", excerpt="post1 excerpt", endpoint="/2019/5/7/post1", id=1)
     post2 = Post(name="post2", published_date=datetime.datetime(2020, 6, 1, 12, 16, 0, 0),
-                 text="post2 text", excerpt="post2 excerpt", endpoint="/2020/6/1/post2")
-    post3 = Post(name="post3", published_date=datetime.datetime(2020, 7, 25, 5, 23, 0, 0),
-                 text="post3 text", excerpt="post3 excerpt", endpoint="/2020/7/25/post3")
+                 text="post2 text", excerpt="post2 excerpt", endpoint="/2020/6/1/post2", id=2)
+    post3 = Post(name="post3", published_date=datetime.datetime(2020, 6, 25, 5, 23, 0, 0),
+                 text="post3 text", excerpt="post3 excerpt", endpoint="/2020/6/25/post3", id=3)
+    post4 = Post(name="post4", published_date=datetime.datetime(2020, 7, 25, 5, 23, 0, 0),
+                 text="post4 text", excerpt="post4 excerpt", endpoint="/2020/7/25/post4", id=4)
+
     post1.tags.append(tag1)
     post1.tags.append(tag2)
     post2.tags.append(tag2)
-    post1.author = user
-    post2.author = user
-    post3.author = user
-    session.add_all([tag1, tag2, post1, post2, post3])
+    post4.tags.append(tag2)
+    post1.author = user1
+    post2.author = user1
+    post3.author = user1
+    post4.author = user2
+    session.add_all([tag1, tag2, post1, post2, post3, post4])
     session.commit()
 
 
 class AuthTestCase(unittest.TestCase):
     def test_login_endpoint(self):
         create_db()
-        success = eval('{"login": True}')
-        fail = eval(
-            '{"login": False, "message": "invalid username or password"}')
+        c = app.app.test_client()
 
-        c = app.app.test_client()
-        res = c.post("/login", json={"username": "a", "password": "12345678"})
-        self.assertEqual(res.json, success)
-        c = app.app.test_client()
-        c.set_cookie("localhost", "token", "asdljnsadlksad")
-        res = c.post("/login", json={"username": "a", "password": "12345678"})
-        self.assertEqual(res.json, success)
-        c = app.app.test_client()
-        c.set_cookie("localhost", "token", user.token)
-        res = c.post("/login")
-        self.assertEqual(res.json, success)
-
-        c = app.app.test_client()
         res = c.post(
             "/login", json={"username": "asd", "password": "12345678"})
-        self.assertEqual(res.json, fail)
-        c = app.app.test_client()
+        self.assertEqual(res.status_code, 401)
+
         res = c.post("/login", json={"username": "", "password": "12345678"})
-        self.assertEqual(res.json, fail)
-        c = app.app.test_client()
+        self.assertEqual(res.status_code, 401)
+
         res = c.post("/login", json={"password": "12345678"})
-        self.assertEqual(res.json, fail)
-        c = app.app.test_client()
+        self.assertEqual(res.status_code, 401)
+
         c.set_cookie("localhost", "token", "asdljnsadlksad")
         res = c.post("/login")
-        self.assertEqual(res.json, fail)
-        c = app.app.test_client()
+        self.assertEqual(res.status_code, 401)
+        c.cookie_jar.clear()
+
         res = c.post("/login")
-        self.assertEqual(res.json, fail)
+        self.assertEqual(res.status_code, 401)
+
+        res = c.post("/login", json={"username": "a", "password": "12345678"})
+        self.assertEqual(res.status_code, 200)
+
+        c.set_cookie("localhost", "token", "asdljnsadlksad")
+        res = c.post("/login", json={"username": "a", "password": "12345678"})
+        self.assertEqual(res.status_code, 200)
+        c.cookie_jar.clear()
+
+        c.set_cookie("localhost", "token", user1.token)
+        res = c.post("/login")
+        self.assertEqual(res.status_code, 200)
+        c.cookie_jar.clear()
 
     def test_logout_endpoint(self):
         create_db()
         c = app.app.test_client()
+
         c.post("/login", json={"username": "a", "password": "12345678"})
         c = app.app.test_client()
-        c.set_cookie("localhost", "token", user.token)
+        c.set_cookie("localhost", "token", user1.token)
         res = c.post("/logout")
-        self.assertEqual(res.json["logout"], True)
+        self.assertEqual(res.status_code, 200)
+
         c = app.app.test_client()
         c.post("/login", json={"username": "a", "password": "12345678"})
         c = app.app.test_client()
         c.set_cookie("localhost", "token", "test")
         res = c.post("/logout")
-        self.assertEqual(res.json["logout"], False)
+        self.assertEqual(res.status_code, 400)
 
 
 class PostsEndpointTestCase(unittest.TestCase):
@@ -98,56 +108,55 @@ class PostsEndpointTestCase(unittest.TestCase):
         create_db()
         app.posts_per_page = 2
         c = app.app.test_client()
-        res = c.get("/posts").json
-        self.assertEqual(res['current_page'], 1)
-        self.assertEqual(res['total_number_of_page'], 2)
-        self.assertEqual(res['posts'][0], {'author': 'ahmet', 'author_id': 1, 'excerpt': 'post3 excerpt', 'id': 3,
-                                           'name': 'post3', 'published_date': '25.07.2020', 'tags': [], 'endpoint': '/2020/7/25/post3'})
-        self.assertEqual(res['posts'][1], {'author': 'ahmet', 'author_id': 1, 'endpoint': '/2020/6/1/post2', 'excerpt': 'post2 excerpt',
-                                           'id': 2, 'name': 'post2', 'published_date': '01.06.2020', 'tags': [{'id': 2, 'name': 'tag2'}]})
-        c = app.app.test_client()
-        res = c.get("/posts?page=2").json
-        self.assertEqual(res['current_page'], 2)
-        self.assertEqual(res['total_number_of_page'], 2)
-        self.assertEqual(res['posts'][0], {'author': 'ahmet', 'author_id': 1, 'endpoint': '/2020/5/7/post1', 'excerpt': 'post1 excerpt',
-                                           'id': 1, 'name': 'post1', 'published_date': '07.05.2020', 'tags': [{'id': 1, 'name': 'tag1'}, {'id': 2, 'name': 'tag2'}]})
-        c = app.app.test_client()
-        res = c.get("/posts?tag=tag2").json
-        self.assertEqual(res['current_page'], 1)
-        self.assertEqual(res['total_number_of_page'], 1)
-        self.assertEqual(res['posts'][0], {'author': 'ahmet', 'author_id': 1, 'endpoint': '/2020/6/1/post2', 'excerpt': 'post2 excerpt',
-                                           'id': 2, 'name': 'post2', 'published_date': '01.06.2020', 'tags': [{'id': 2, 'name': 'tag2'}]})
-        self.assertEqual(res['posts'][1], {'author': 'ahmet', 'author_id': 1, 'endpoint': '/2020/5/7/post1', 'excerpt': 'post1 excerpt',
-                                           'id': 1, 'name': 'post1', 'published_date': '07.05.2020', 'tags': [{'id': 1, 'name': 'tag1'}, {'id': 2, 'name': 'tag2'}]})
-        c = app.app.test_client()
-        res = c.get("/posts?tag=notexisttag").json
-        self.assertEqual(res, {'message': 'tag not found'})
-        c = app.app.test_client()
-        res = c.get("/posts?page=notexistpage").json
-        self.assertEqual(res['current_page'], 1)
-        self.assertEqual(res['total_number_of_page'], 2)
+
+        res = c.get("/posts")
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(res.json['current_page'], 1)
+        self.assertEqual(res.json['total_number_of_page'], 2)
+        self.assertEqual(res.json['posts'][0]['name'], 'post4')
+        self.assertEqual(res.json['posts'][1]['name'], 'post3')
+
+        res = c.get("/posts?page=2")
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(res.json['current_page'], 2)
+        self.assertEqual(res.json['total_number_of_page'], 2)
+        self.assertEqual(res.json['posts'][0]['name'], 'post2')
+        self.assertEqual(res.json['posts'][1]['name'], 'post1')
+
+        res = c.get("/posts?tag=tag2")
+        self.assertEqual(res.json['current_page'], 1)
+        self.assertEqual(res.json['total_number_of_page'], 2)
+        self.assertEqual(res.json['posts'][0]['name'], 'post4')
+        self.assertEqual(res.json['posts'][1]['name'], 'post2')
+
+        res = c.get("/posts?tag=notexisttag")
+        self.assertEqual(res.status_code, 404)
 
 
 class GetPostEndpointTestCase(unittest.TestCase):
     def test_get_post_endpoint(self):
         create_db()
         c = app.app.test_client()
-        res = c.get("/2020/07/25/post3").json
-        self.assertEqual(res, {'author_id': 1, 'endpoint': '/2020/7/25/post3', 'id': 3, 'name': 'post3',
-                               'published_date': '25.07.2020', 'tags': [], 'text': 'post3 text'})
-        c = app.app.test_client()
-        res = c.get("/2020/06/01/post2").json
-        self.assertEqual(res, {'author_id': 1, 'endpoint': '/2020/6/1/post2', 'id': 2, 'name': 'post2',
-                               'published_date': '01.06.2020', 'tags': [{'id': 2, 'name': 'tag2'}], 'text': 'post2 text'})
+
+        res = c.get("/2020/6/25/post3")
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(res.json['name'], 'post3')
+
+        res = c.get("/2020/06/01/post2")
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(res.json['name'], 'post2')
+
+        res = c.get("/2020/06/01/post3")
+        self.assertEqual(res.status_code, 404)
 
 
 class TagListEndpointTestCase(unittest.TestCase):
     def test_tag_list_endpoint(self):
         create_db()
         c = app.app.test_client()
-        res = c.get("/taglist").json
+        res = c.get("/taglist")
         self.assertEqual(
-            res, [{'id': 1, 'name': 'tag1'}, {'id': 2, 'name': 'tag2'}])
+            res.json, [{'id': 1, 'name': 'tag1'}, {'id': 2, 'name': 'tag2'}])
 
 
 class CreatePostEndpointTestCase(unittest.TestCase):
@@ -156,31 +165,30 @@ class CreatePostEndpointTestCase(unittest.TestCase):
         c = app.app.test_client()
         res = c.post("/login", json={"username": "a", "password": "12345678"})
 
-        c = app.app.test_client()
         c.set_cookie("localhost", "token", "asdljnsadlksad")
         res = c.post(
-            "/createpost", json={"post_name": "post_name", "post_text": "post_text"}).json
-        self.assertEqual(
-            res, {'login': False, 'message': 'unauthorized request'})
-        c = app.app.test_client()
-        c.set_cookie("localhost", "token", user.token)
+            "/createpost", json={"post_name": "post_name", "post_text": "post_text"})
+        self.assertEqual(res.status_code, 401)
+        c.cookie_jar.clear()
+
+        c.set_cookie("localhost", "token", user1.token)
         res = c.post("/createpost", json={"post_name": "post_name",
-                                          "post_text": "post_text", "tags": ["tag1", "tag2"]}).json
-        self.assertEqual(res, {'message': 'post added'})
+                                          "post_text": "post_text", "tags": ["tag1", "tag2"]})
+        self.assertEqual(res.status_code, 200)
         self.assertEqual(session.query(Post).all()[-1].name, 'post_name')
         self.assertEqual(session.query(Post).all()[-1].text, 'post_text')
         self.assertEqual(session.query(Post).all()[-1].tags[0].name, 'tag1')
         self.assertEqual(session.query(Post).all()[-1].tags[1].name, 'tag2')
-        c = app.app.test_client()
-        c.set_cookie("localhost", "token", user.token)
+
+        c.set_cookie("localhost", "token", user1.token)
         res = c.post(
-            "/createpost", json={"post_text": "post_text", "tags": ["tag1", "tag2"]}).json
-        self.assertEqual(res, {'message': 'post name or post body is invalid'})
-        c = app.app.test_client()
-        c.set_cookie("localhost", "token", user.token)
+            "/createpost", json={"post_text": "post_text", "tags": ["tag1", "tag2"]})
+        self.assertEqual(res.status_code, 400)
+
+        c.set_cookie("localhost", "token", user1.token)
         res = c.post(
-            "/createpost", json={"post_name": "post_name", "tags": ["tag1", "tag2"]}).json
-        self.assertEqual(res, {'message': 'post name or post body is invalid'})
+            "/createpost", json={"post_name": "post_name", "tags": ["tag1", "tag2"]})
+        self.assertEqual(res.status_code, 400)
 
 
 class CreateTagEndpointTestCase(unittest.TestCase):
@@ -189,31 +197,29 @@ class CreateTagEndpointTestCase(unittest.TestCase):
         c = app.app.test_client()
         res = c.post("/login", json={"username": "a", "password": "12345678"})
 
-        c = app.app.test_client()
         c.set_cookie("localhost", "token", "asdljnsadlksad")
-        res = c.post("/createtag", json={"tag_name": "tag3"}).json
-        self.assertEqual(
-            res, {'login': False, 'message': 'unauthorized request'})
-        c = app.app.test_client()
-        c.set_cookie("localhost", "token", user.token)
-        res = c.post("/createtag").json
-        self.assertEqual(res, {"message": "tag name is invalid"})
-        c = app.app.test_client()
-        c.set_cookie("localhost", "token", user.token)
-        res = c.post("/createtag", json={"tag_name": "tag2"}).json
-        self.assertEqual(res, {"message": "tag is exist"})
-        c = app.app.test_client()
-        c.set_cookie("localhost", "token", user.token)
-        res = c.post("/createtag", json={"tag_name": "tag3"}).json
-        self.assertEqual(res, {"message": "tag is added"})
+        res = c.post("/createtag", json={"tag_name": "tag3"})
+        self.assertEqual(res.status_code, 401)
+
+        c.set_cookie("localhost", "token", user1.token)
+        res = c.post("/createtag")
+        self.assertEqual(res.status_code, 400)
+
+        c.set_cookie("localhost", "token", user1.token)
+        res = c.post("/createtag", json={"tag_name": "tag2"})
+        self.assertEqual(res.status_code, 409)
+
+        c.set_cookie("localhost", "token", user1.token)
+        res = c.post("/createtag", json={"tag_name": "tag3"})
+        self.assertEqual(res.status_code, 200)
 
 
 class SetTokenToUserTestCase(unittest.TestCase):
     def test_set_token_to_user(self):
         create_db()
         token = "token"
-        set_token_to_user(user, token, session)
-        self.assertEqual(user.token, token)
+        set_token_to_user(user1, token, session)
+        self.assertEqual(user1.token, token)
 
 
 class CreateTokenTestCase(unittest.TestCase):
@@ -228,35 +234,106 @@ class CreateTokenTestCase(unittest.TestCase):
 class RegisterUserTestCase(unittest.TestCase):
     def test_register_user(self):
         create_db()
-        user1 = register_user(
-            session=session, name="a",
-            username=user.username, password="12345678", )
-        user2 = register_user(
-            session=session, name="qwe",
-            username="abc", password="123"
+
+        test_user1 = register_user(
+            session=session, name="Manwe",
+            username=user1.username, password="12345678", )
+        test_user2 = register_user(
+            session=session, name="Irmo",
+            username="Irmo", password="123"
         )
-        user3 = register_user(
-            session=session, name="a",
-            username="abd", password="123456789012345678901234567890123"
+        test_user3 = register_user(
+            session=session, name="Orome",
+            username="orome", password="123456789012345678901234567890123"
         )
-        user4 = register_user(
+        test_user4 = register_user(
             session=session, name="",
-            username="abe", password="12345678"
+            username="ulmo", password="12345678"
         )
-        user5 = register_user(
-            session=session, name="qwe",
+        test_user5 = register_user(
+            session=session, name="Aule",
             username="", password="12345678"
         )
-        user6 = register_user(
-            session=session, name="qwe",
-            username="abe", password="12345678"
+        test_user6 = register_user(
+            session=session, name="Melkor",
+            username="melkor", password="12345678"
         )
-        self.assertFalse(user1)
-        self.assertFalse(user2)
-        self.assertFalse(user3)
-        self.assertFalse(user4)
-        self.assertFalse(user5)
-        self.assertEqual(user6.username, "abe")
+        self.assertFalse(test_user1)
+        self.assertFalse(test_user2)
+        self.assertFalse(test_user3)
+        self.assertFalse(test_user4)
+        self.assertFalse(test_user5)
+        self.assertEqual(test_user6.username, "melkor")
+
+
+class EditPostEndpointTestCase(unittest.TestCase):
+    def test_editpost_endpoint(self):
+        create_db()
+        c = app.app.test_client()
+
+        res = c.post(
+            "/editpost", json={"post_name": "updated name", "post_text": "updated text"})
+        self.assertEqual(res.status_code, 401)
+
+        expr = datetime.datetime.now() + datetime.timedelta(days=1)
+        user1token = create_token("a", expr)
+        user2token = create_token("m", expr)
+        set_token_to_user(user1, user1token, session)
+        set_token_to_user(user2, user2token, session)
+
+        c.set_cookie("localhost", "token", "asdljnsadlksad")
+        res = c.post(
+            "/editpost", json={"post_name": "updated name", "post_text": "updated text"})
+        self.assertEqual(res.status_code, 401)
+
+        c.set_cookie("localhost", "token", user2token)
+        res = c.post(
+            "/editpost", json={"name": "updated name", "text": "updated text"})
+        self.assertEqual(res.status_code, 400)
+
+        c.set_cookie("localhost", "token", user1token)
+        res = c.post(
+            "/editpost", json={"name": "updated name", "text": "updated text", "id": 4})
+        self.assertEqual(res.status_code, 401)
+
+        c.set_cookie("localhost", "token", user2token)
+        res = c.post(
+            "/editpost", json={"name": "updated name", "text": "updated text", "id": 4})
+        self.assertEqual(res.status_code, 200)
+
+
+class CreateCustomPageEndpointTestCase(unittest.TestCase):
+    def test_createcustompage_endpoint(self):
+        create_db()
+        c = app.app.test_client()
+
+        expr = datetime.datetime.now() + datetime.timedelta(days=1)
+        user1token = create_token("a", expr)
+        set_token_to_user(user1, user1token, session)
+
+        res = c.post("/createcustompage",
+                     json={"name": "test", "text": "text", "endpoint": "/testendoint"})
+        self.assertEqual(res.status_code, 401)
+
+        c.set_cookie("localhost", "token", "qwewqe")
+        res = c.post("/createcustompage",
+                     json={"name": "test", "text": "text", "endpoint": "/testendoint"})
+        self.assertEqual(res.status_code, 401)
+
+        c.set_cookie("localhost", "token", user1token)
+        res = c.post("/createcustompage",
+                     json={"text": "text", "endpoint": "/testendoint"})
+        self.assertEqual(res.status_code, 400)
+
+        c.set_cookie("localhost", "token", user1token)
+        res = c.post("/createcustompage",
+                     json={"name": "test", "text": "text", "endpoint": "/testendoint"})
+        self.assertEqual(res.status_code, 200)
+
+        c.set_cookie("localhost", "token", user1token)
+        res = c.post("/createcustompage",
+                     json={"name": "test", "text": "text", "endpoint": "/testendoint"})
+        self.assertEqual(res.status_code, 409)
 
 
 if __name__ == '__main__':

@@ -22,7 +22,6 @@ def make_response_with_token(body, token):
 
 @app.route('/login', methods=["POST"])
 def login():
-    global session
     user = is_login(request, session)
     if user:
         resp = make_response_with_token({"login": True}, user.token)
@@ -53,7 +52,7 @@ def logout():
         session.commit()
         res = make_response_with_token({"logout": True}, "")
         return res, 200
-    return jsonify({"logout": False}), 200
+    return jsonify({"logout": False}), 400
 
 
 @app.route('/posts', methods=["GET"])
@@ -134,7 +133,7 @@ def addpost():
         post_name = html.escape(content["post_name"])
         post_text = content["post_text"]
     except:
-        return jsonify({"message": "post name or post body is invalid"}), 400
+        return jsonify({"message": "post name or post body invalid"}), 400
     published_date = datetime.datetime.now()
     endpoint = f"/{published_date.year}/{published_date.month}/{published_date.day}/{'-'.join(post_name.split()).lower()}"
     temp_endpoint = endpoint
@@ -158,6 +157,34 @@ def addpost():
     return jsonify({"message": "post added"}), 200
 
 
+@app.route('/editpost', methods=["POST"])
+def editpost():
+    user = is_login(request, session)
+    if not user:
+        return jsonify({"login": False, "message": "unauthorized request"}), 401
+    try:
+        content = request.json
+        post_name = html.escape(content["name"])
+        post_text = content["text"]
+        post_id = content["id"]
+    except:
+        return jsonify({"message": "post name or post body invalid"}), 400
+    post = session.query(Post).filter_by(id=post_id).first()
+    if post:
+        if post.author.id != user.id:
+            return jsonify({"login": False, "message": "unauthorized request"}), 401
+        post.name = post_name
+        post.text = post_text
+        try:
+            post.endpoint = content["endpoint"]
+        except:
+            pass
+        session.add(post)
+        session.commit()
+        return jsonify({"message": "post updated"}), 200
+    return jsonify({"message": "post not found"}), 404
+
+
 @app.route('/createtag', methods=["POST"])
 def addtag():
     user = is_login(request, session)
@@ -167,14 +194,14 @@ def addtag():
         content = request.json
         tag_name = content['tag_name']
     except:
-        return jsonify({"message": "tag name is invalid"}), 400
+        return jsonify({"message": "tag name invalid"}), 400
     tag = session.query(Tag).filter(func.lower(Tag.name) == tag_name).first()
     if tag:
-        return jsonify({"message": "tag is exist"}), 409
+        return jsonify({"message": "tag exist"}), 409
     tag = Tag(name=tag_name)
     session.add(tag)
     session.commit()
-    return jsonify({"message": "tag is added"}), 200
+    return jsonify({"message": "tag added"}), 200
 
 # for custom pages like about, contact
 @app.route('/<string:custom>', methods=["GET"])
@@ -198,11 +225,11 @@ def createCustomPage():
         page_text = content["text"]
         page_endpoint = content["endpoint"]
     except:
-        return jsonify({"message": "page name, text or endpoint is invalid"}), 400
+        return jsonify({"message": "page name, text or endpoint invalid"}), 400
     page_exist = session.query(CustomPage).filter_by(
         endpoint=page_endpoint).first()
     if page_exist:
-        return jsonify({"message": "page is exist"}), 409
+        return jsonify({"message": "page exist"}), 409
     page = CustomPage(name=page_name, text=page_text, endpoint=page_endpoint)
     session.add(page)
     session.commit()
