@@ -4,7 +4,7 @@ import datetime
 from config import SECRET_KEY
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from models import Base, Author, Tag
+from models import Base, Author, Tag, CustomPage
 from auth import create_token, set_token_to_user, is_login, register_user
 from flask import Flask
 import app
@@ -37,6 +37,8 @@ def create_db():
     post4 = Post(name="post4", published_date=datetime.datetime(2020, 7, 25, 5, 23, 0, 0),
                  text="post4 text", excerpt="post4 excerpt", endpoint="/2020/7/25/post4", id=4)
 
+    custom = CustomPage(name="About", endpoint="/about", text="its my about")
+
     post1.tags.append(tag1)
     post1.tags.append(tag2)
     post2.tags.append(tag2)
@@ -45,7 +47,7 @@ def create_db():
     post2.author = user1
     post3.author = user1
     post4.author = user2
-    session.add_all([tag1, tag2, post1, post2, post3, post4])
+    session.add_all([tag1, tag2, post1, post2, post3, post4, custom])
     session.commit()
 
 
@@ -334,6 +336,21 @@ class CreateCustomPageEndpointTestCase(unittest.TestCase):
         res = c.post("/createcustompage",
                      json={"name": "test", "text": "text", "endpoint": "/testendoint"})
         self.assertEqual(res.status_code, 409)
+
+
+class CustomPageEndpointTestCase(unittest.TestCase):
+    def test_custompage_endpoint(self):
+        create_db()
+        c = app.app.test_client()
+
+        res = c.get("/about")
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(res.json['name'], "About")
+        self.assertEqual(res.json['endpoint'], "/about")
+        self.assertEqual(res.json['text'], "its my about")
+
+        res = c.get("/contact")
+        self.assertEqual(res.status_code, 404)
 
 
 if __name__ == '__main__':
