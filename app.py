@@ -108,7 +108,7 @@ def posts():
     return make_response_with_token(body, ""), 200
 
 
-@app.route('/<int:year>/<int:month>/<int:day>/<string:name>')
+@app.route('/<int:year>/<int:month>/<int:day>/<string:name>', methods=["GET"])
 def post(year, month, day, name):
     user = is_login(request, session)
     endpoint = f"/{year}/{month}/{day}/{name}"
@@ -131,7 +131,7 @@ def post(year, month, day, name):
     return make_response_with_token({"message": "post not found"}, ""), 404
 
 
-@app.route('/taglist')
+@app.route('/taglist', methods=["GET"])
 def taglist():
     user = is_login(request, session)
     tags_all = session.query(Tag).all()
@@ -266,5 +266,4 @@ def createCustomPage():
 
 
 if __name__ == '__main__':
-
     app.run()
