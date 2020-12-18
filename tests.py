@@ -102,7 +102,7 @@ class AuthTestCase(unittest.TestCase):
         c = app.app.test_client()
         c.set_cookie("localhost", "token", "test")
         res = c.post("/logout")
-        self.assertEqual(res.status_code, 400)
+        self.assertEqual(res.status_code, 200)
 
 
 class PostsEndpointTestCase(unittest.TestCase):
