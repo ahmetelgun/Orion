@@ -153,21 +153,23 @@ def addpost():
     user = is_login(request, session)
     if not user:
         return make_response_with_token({"login": False, "message": "unauthorized request"}, ""), 401
+
     try:
         content = request.json
         post_name = html.escape(content["post_name"])
         post_text = content["post_text"]
     except:
         return make_response_with_token({"message": "post name or post body invalid"}, user.token), 400
+
     published_date = datetime.datetime.now()
     endpoint = f"/{published_date.year}/{published_date.month}/{published_date.day}/{'-'.join(post_name.split()).lower()}"
-    temp_endpoint = endpoint
-    while len(session.query(Post).filter_by(endpoint=temp_endpoint).all()) > 0:
-        temp_endpoint = endpoint + "-" + \
-            "".join(random.choices(string.ascii_lowercase, k=4))
+    if session.query(Post).filter_by(endpoint=endpoint).first():
+        return make_response_with_token({"message": "you can publish a post with the same name in one day"}, user.token), 401
+    
     post_excerpt = post_text[:50]
     post = Post(name=post_name, published_date=published_date,
-                text=post_text, excerpt=post_excerpt, endpoint=temp_endpoint)
+                text=post_text, excerpt=post_excerpt, endpoint=endpoint)
+
     try:
         tags = set([session.query(Tag)
                     .filter_by(name=i).first() for i in content['tags']])
@@ -176,6 +178,7 @@ def addpost():
                 post.tags.append(tag)
     except:
         pass
+    
     post.author = user
     session.add(post)
     session.commit()
@@ -186,7 +189,7 @@ def addpost():
 def editpost():
     user = is_login(request, session)
     if not user:
-        return make_response_with_token({"login": False, "message": "unauthorized request"}, ""), 401
+        return make_response_with_token({"message": "unauthorized request"}, ""), 401
     try:
         content = request.json
         post_name = html.escape(content["post_name"])
@@ -200,10 +203,9 @@ def editpost():
             return make_response_with_token({"message": "unauthorized request"}, user.token), 401
         post.name = post_name
         post.text = post_text
-        try:
-            post.endpoint = content["endpoint"]
-        except:
-            pass
+        endpoint = f"/{post.published_date.year}/{post.published_date.month}/{post.published_date.day}/{'-'.join(post_name.split()).lower()}"
+        if (p := session.query(Post).filter_by(endpoint=endpoint).first()) and p.id != post_id:
+            return make_response_with_token({"message": "you can publish a post with the same name in one day"}, user.token), 401
         try:
             tags = set([session.query(Tag)
                         .filter_by(name=i['name']).first() for i in content['tags']])
