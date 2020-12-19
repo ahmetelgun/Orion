@@ -138,11 +138,7 @@ def post(year, month, day, name):
 def taglist():
     user = is_login(request, session)
     tags_all = session.query(Tag).all()
-    tags = []
-    for tag in tags_all:
-        t = tag.__dict__
-        t.pop('_sa_instance_state', None)
-        tags.append(t)
+    tags = [tag.name for tag in tags_all]
     if user:
         return make_response_with_token(tags, user.token), 200
     return make_response_with_token(tags, ""), 200
@@ -236,7 +232,7 @@ def addtag():
     session.commit()
     return make_response_with_token({"message": "tag added"}, user.token), 200
 
-# for custom pages like about, contact
+# for custom pages like about or contact
 @app.route('/<string:custom>', methods=["GET"])
 def customPages(custom):
     user = is_login(request, session)
