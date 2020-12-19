@@ -91,9 +91,10 @@ def posts():
     else:
         current_page = 1
     for post in posts[current_page*posts_per_page-posts_per_page: current_page*posts_per_page]:
-        taglist = [{'id': tag.id, 'name': tag.name} for tag in post.tags]
+        taglist = [{'name': tag.name} for tag in post.tags]
         author_name = post.author.name
         post = post.__dict__
+        post.pop('author_id')
         post['author'] = author_name
         post['tags'] = taglist
         post.pop('_sa_instance_state', None)
@@ -118,11 +119,13 @@ def post(year, month, day, name):
         tags = [tag.__dict__ for tag in post.tags]
         for tag in tags:
             tag.pop('_sa_instance_state', None)
+            tag.pop('id')
         res['tags'] = tags
         res['published_date'] = res['published_date']\
             .strftime('%d.%m.%Y')
         res.pop('_sa_instance_state', None)
         res.pop('excerpt')
+        res.pop('author_id')
         if user:
             return make_response_with_token(res, user.token), 200
         return make_response_with_token(res, ""), 200
