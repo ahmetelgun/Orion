@@ -189,9 +189,9 @@ def editpost():
         return make_response_with_token({"login": False, "message": "unauthorized request"}, ""), 401
     try:
         content = request.json
-        post_name = html.escape(content["name"])
-        post_text = content["text"]
-        post_id = content["id"]
+        post_name = html.escape(content["post_name"])
+        post_text = content["post_text"]
+        post_id = content["post_id"]
     except:
         return make_response_with_token({"message": "post name or post body invalid"}, user.token), 400
     post = session.query(Post).filter_by(id=post_id).first()
@@ -202,6 +202,12 @@ def editpost():
         post.text = post_text
         try:
             post.endpoint = content["endpoint"]
+        except:
+            pass
+        try:
+            tags = set([session.query(Tag)
+                        .filter_by(name=i['name']).first() for i in content['tags']])
+            post.tags = list(tags)
         except:
             pass
         session.add(post)
