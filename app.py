@@ -241,6 +241,8 @@ def customPages(custom):
     if page:
         res = page.__dict__
         res.pop('_sa_instance_state', None)
+        res.pop("id")
+        res.pop("endpoint")
         if user:
             return make_response_with_token(res, user.token), 200
         return make_response_with_token(res, ""), 200
