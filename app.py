@@ -41,7 +41,7 @@ def login():
         username = html.escape(content["username"])
         password = content["password"]
     except:
-        return make_response_with_token({"login": False, "message": "invalid username or password"}, ""), 401
+        return make_response_with_token({"login": False, "message": "invalid username or password"}, ""), 400
     user = session.query(Author).filter_by(username=username).first()
     if user:
         if check_password_hash(user.password, password):
@@ -59,7 +59,8 @@ def logout():
         user.token = ""
         session.add(user)
         session.commit()
-    return make_response_with_token({"logout": True}, ""), 200
+        return make_response_with_token({"logout": True}, ""), 200
+    return make_response_with_token({"message": "user not exist"}, ""), 404
 
 
 @app.route('/posts', methods=["GET"])
