@@ -50,20 +50,20 @@ Returns post list. Supports searching by page number or tag name.
 
 ```json
 {   
-    "current_page": <int:current_page_number>,
-    "total_number_of_page": <int:total_page>,
+    "current_page": "int:current_page_number",
+    "total_number_of_page": "int:total_page",
     "posts" :[
-        "author": <string:author-name>,
-        "endpoint": <string:/yyyy/mm/dd/post-name>,
-        "excerpt": <string:post-excerpt>,
-        "name": <string:Post name>,
-        "published_date": <string:dd.mm.yyyy>,
+        "author": "string:author-name",
+        "endpoint": "string:/yyyy/mm/dd/post-name",
+        "excerpt": "string:post-excerpt",
+        "name": "string:Post name",
+        "published_date": "string:dd.mm.yyyy",
         "tags": [
             {
-                "name": <string:tag_name>
+                "name": "string:tag_name"
             },
             {
-                "name": <string:tag_name>
+                "name": "string:tag_name"
             },
         ]   
     ] 
@@ -90,18 +90,18 @@ Returns selected post.
 
 ```json
 {
-    "endpoint": <string:/yyyy/mm/dd/postname>,
-    "name": <string:post_name>,
-    "published_date": <string:dd.mm.yyyy>,
+    "endpoint": "string:/yyyy/mm/dd/postname",
+    "name": "string:post_name",
+    "published_date": "string:dd.mm.yyyy",
     "tags": [
         {
-            "name": <string:tag_name>
+            "name": "string:tag_name"
         },
         {
-            "name": <string:tag_name>
+            "name": "string:tag_name"
         }
     ],
-    "text": <string:post_text>
+    "text": "string:post_text"
 }
 ```
 
@@ -121,11 +121,11 @@ Create new post
 **Request body template**
 ```json
 {
-    "post_name": <string:post_name>,
-    "post_text": <string:post_text>,
+    "post_name": "string:post_name",
+    "post_text": "string:post_text",
     "tags": [
-        "name": <string:tag_name>,
-        "name": <string:tag_name>
+        "name": "string:tag_name",
+        "name": "string:tag_name"
     ]
 }
 ```
@@ -150,12 +150,12 @@ Edit the text, name or tags of a post with given post_id.
 
 ```json
 {
-    "post_name": <string:post_name>,
-    "post_text": <string:post_text>,
-    "post_id": <int:post_id>,
+    "post_name": "string:post_name",
+    "post_text": "string:post_text",
+    "post_id": "int:post_id",
     "tags": [
-        "name": <string:tag_name>,
-        "name": <string:tag_name>
+        "name": "string:tag_name",
+        "name": "string:tag_name"
     ]
 }
 ```
@@ -181,9 +181,9 @@ Get all tags
 
 ```json
 [
-    <string:tag_name>,
-    <string:tag_name>,
-    <string:tag_name>
+    "string:tag_name",
+    "string:tag_name",
+    "string:tag_name"
 ]
 ```
 
@@ -196,7 +196,7 @@ Get all tags
 
 ```json
 {
-    "tag_name": <string:tag_name>
+    "tag_name": "string:tag_name"
 }
 ```
 
@@ -219,8 +219,8 @@ Successful response:
 
 ```json
 {
-    "name": <string:name>,
-    "text": <string:text>
+    "name": "string:name",
+    "text": "string:text"
 }
 ```
 
@@ -234,9 +234,9 @@ Get a custom page like About or Contact
 **Request body template**
 ```json
 {
-    "name": <string:page_name>,
-    "text": <string:page_text>,
-    "endpoint": <string:/page_endpoint>,
+    "name": "string:page_name",
+    "text": "string:page_text",
+    "endpoint": "string:/page_endpoint",
 }
 ```
 
@@ -260,8 +260,8 @@ User login endpoint
 **Request body template**
 ```json
 {
-    "username": <string:page_name>,
-    "password": <string:page_text>
+    "username": "string:page_name",
+    "password": "string:page_text"
 }
 
 ```
