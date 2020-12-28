@@ -161,8 +161,8 @@ def addpost():
     published_date = datetime.datetime.now()
     endpoint = f"/{published_date.year}/{published_date.month}/{published_date.day}/{'-'.join(post_name.split()).lower()}"
     if session.query(Post).filter_by(endpoint=endpoint).first():
-        return make_response_with_token({"message": "you can publish a post with the same name in one day"}, user.token), 400
-    
+        return make_response_with_token({"message": "you can publish a post with the same name in one day"}, user.token), 409
+
     post_excerpt = post_text[:50]
     post = Post(name=post_name, published_date=published_date,
                 text=post_text, excerpt=post_excerpt, endpoint=endpoint)
@@ -202,7 +202,7 @@ def editpost():
         post.text = post_text
         endpoint = f"/{post.published_date.year}/{post.published_date.month}/{post.published_date.day}/{'-'.join(post_name.split()).lower()}"
         if (p := session.query(Post).filter_by(endpoint=endpoint).first()) and p.id != post_id:
-            return make_response_with_token({"message": "you can publish a post with the same name in one day"}, user.token), 400
+            return make_response_with_token({"message": "you can publish a post with the same name in one day"}, user.token), 409
         try:
             tags = set([session.query(Tag)
                         .filter_by(name=i['name']).first() for i in content['tags']])
