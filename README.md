@@ -48,7 +48,7 @@ Returns post list. Supports searching by page number or tag name.
 
 **successful response:**
 
-```json
+```yaml
 {   
     "current_page": "int:current_page_number",
     "total_number_of_page": "int:total_page",
@@ -88,7 +88,7 @@ Returns selected post.
 
 **successful response:**
 
-```json
+```yaml
 {
     "endpoint": "string:/yyyy/mm/dd/postname",
     "name": "string:post_name",
@@ -119,7 +119,7 @@ Create new post
 * tags
 
 **Request body template**
-```json
+```yaml
 {
     "post_name": "string:post_name",
     "post_text": "string:post_text",
@@ -148,7 +148,7 @@ Edit the text, name or tags of a post with given post_id.
 
 **Request body template**
 
-```json
+```yaml
 {
     "post_name": "string:post_name",
     "post_text": "string:post_text",
@@ -179,7 +179,7 @@ Get all tags
 
 **successful response:**
 
-```json
+```yaml
 [
     "string:tag_name",
     "string:tag_name",
@@ -194,7 +194,7 @@ Get all tags
 
 **Request body template**
 
-```json
+```yaml
 {
     "tag_name": "string:tag_name"
 }
@@ -217,7 +217,7 @@ If page not found, return 404.
 
 Successful response:
 
-```json
+```yaml
 {
     "name": "string:name",
     "text": "string:text"
@@ -232,7 +232,7 @@ Get a custom page like About or Contact
 * POST
 
 **Request body template**
-```json
+```yaml
 {
     "name": "string:page_name",
     "text": "string:page_text",
@@ -258,7 +258,7 @@ User login endpoint
 * POST
 
 **Request body template**
-```json
+```yaml
 {
     "username": "string:page_name",
     "password": "string:page_text"
