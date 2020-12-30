@@ -17,7 +17,7 @@ session = create_session(engine)
 app.debug = True
 
 
-def create_response(body, token):
+def create_response(body, token=""):
     resp = jsonify(body)
     if token == "":
         is_login = "false"
@@ -34,14 +34,13 @@ def create_response(body, token):
 def login():
     user = is_login(request, session)
     if user:
-        resp = create_response({"login": True}, user.token)
-        return resp, 200
+        return create_response({"login": True}, user.token), 200
     try:
         content = request.json
         username = html.escape(content["username"])
         password = content["password"]
     except:
-        return create_response({"login": False, "message": "invalid username or password"}, ""), 400
+        return create_response({"login": False, "message": "invalid username or password"}), 400
     user = session.query(Author).filter_by(username=username).first()
     if user:
         if check_password_hash(user.password, password):
@@ -49,7 +48,7 @@ def login():
             token = create_token(user.username, expiration_time)
             set_token_to_user(user, token, session)
             return create_response({"login": True}, token), 200
-    return create_response({"login": False, "message": "invalid username or password"}, ""), 401
+    return create_response({"login": False, "message": "invalid username or password"}), 401
 
 
 @app.route('/logout', methods=["POST"])
@@ -59,8 +58,8 @@ def logout():
         user.token = ""
         session.add(user)
         session.commit()
-        return create_response({"logout": True}, ""), 200
-    return create_response({"message": "user not exist"}, ""), 404
+        return create_response({"logout": True}), 200
+    return create_response({"message": "user not exist"}), 404
 
 
 @app.route('/posts', methods=["GET"])
@@ -78,7 +77,7 @@ def posts():
         else:
             if user:
                 return create_response({"message": "tag not found"}, user.token), 404
-            return create_response({"message": "tag not found"}, ""), 404
+            return create_response({"message": "tag not found"}), 404
     else:  # if not tag query in query string
         posts = session.query(Post).order_by(Post.published_date.desc()).all()
     if len(posts) > posts_per_page:
@@ -107,7 +106,7 @@ def posts():
             'total_number_of_page': total_number_of_page}
     if user:
         return create_response(body, user.token), 200
-    return create_response(body, ""), 200
+    return create_response(body), 200
 
 
 @app.route('/<int:year>/<int:month>/<int:day>/<string:name>', methods=["GET"])
@@ -129,10 +128,10 @@ def post(year, month, day, name):
         res.pop('author_id')
         if user:
             return create_response(res, user.token), 200
-        return create_response(res, ""), 200
+        return create_response(res), 200
     if user:
         return create_response({"message": "post not found"}, user.token), 404
-    return create_response({"message": "post not found"}, ""), 404
+    return create_response({"message": "post not found"}), 404
 
 
 @app.route('/taglist', methods=["GET"])
@@ -142,14 +141,14 @@ def taglist():
     tags = [tag.name for tag in tags_all]
     if user:
         return create_response(tags, user.token), 200
-    return create_response(tags, ""), 200
+    return create_response(tags), 200
 
 
 @app.route('/createpost', methods=["POST"])
 def addpost():
     user = is_login(request, session)
     if not user:
-        return create_response({"message": "unauthorized request"}, ""), 401
+        return create_response({"message": "unauthorized request"}), 401
 
     try:
         content = request.json
@@ -186,7 +185,7 @@ def addpost():
 def editpost():
     user = is_login(request, session)
     if not user:
-        return create_response({"message": "unauthorized request"}, ""), 401
+        return create_response({"message": "unauthorized request"}), 401
     try:
         content = request.json
         post_name = html.escape(content["post_name"])
@@ -201,7 +200,7 @@ def editpost():
         post.name = post_name
         post.text = post_text
         endpoint = f"/{post.published_date.year}/{post.published_date.month}/{post.published_date.day}/{'-'.join(post_name.split()).lower()}"
-        if (p: = session.query(Post).filter_by(endpoint=endpoint).first()) and p.id != post_id:
+        if (p := session.query(Post).filter_by(endpoint=endpoint).first()) and p.id != post_id:
             return create_response({"message": "you can publish a post with the same name in one day"}, user.token), 409
         try:
             tags = set([session.query(Tag)
@@ -219,7 +218,7 @@ def editpost():
 def addtag():
     user = is_login(request, session)
     if not user:
-        return create_response({"message": "unauthorized request"}, ""), 401
+        return create_response({"message": "unauthorized request"}), 401
     try:
         content = request.json
         tag_name = content['tag_name']
@@ -245,17 +244,17 @@ def customPages(custom):
         res.pop("endpoint")
         if user:
             return create_response(res, user.token), 200
-        return create_response(res, ""), 200
+        return create_response(res), 200
     if user:
         return create_response({"message": "page not found"}, user.token), 404
-    return create_response({"message": "page not found"}, ""), 404
+    return create_response({"message": "page not found"}), 404
 
 
 @app.route('/createcustompage', methods=["POST"])
 def createCustomPage():
     user = is_login(request, session)
     if not user:
-        return create_response({"message": "unauthorized request"}, ""), 401
+        return create_response({"message": "unauthorized request"}), 401
     try:
         content = request.json
         page_name = html.escape(content["name"])
