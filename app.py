@@ -19,12 +19,8 @@ app.debug = True
 
 def create_response(body, token=""):
     resp = jsonify(body)
-    if token == "":
-        is_login = "false"
-    else:
-        is_login = "true"
-
-    resp.set_cookie("isLogin", is_login, samesite='Strict')
+    isLogin = "false" if token == "" else "true"
+    resp.set_cookie("isLogin", isLogin, samesite='Strict')
     resp.set_cookie("token", token, secure=True,
                     httponly=True, samesite='Strict')
     return resp
@@ -200,7 +196,7 @@ def editpost():
         post.name = post_name
         post.text = post_text
         endpoint = f"/{post.published_date.year}/{post.published_date.month}/{post.published_date.day}/{'-'.join(post_name.split()).lower()}"
-        if (p := session.query(Post).filter_by(endpoint=endpoint).first()) and p.id != post_id:
+        if (p:= session.query(Post).filter_by(endpoint=endpoint).first()) and p.id != post_id:
             return create_response({"message": "you can publish a post with the same name in one day"}, user.token), 409
         try:
             tags = set([session.query(Tag)
