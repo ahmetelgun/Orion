@@ -87,12 +87,11 @@ def posts():
     else:
         current_page = 1
     for post in posts[current_page*posts_per_page-posts_per_page: current_page*posts_per_page]:
-        taglist = [{'name': tag.name} for tag in post.tags]
         author_name = post.author.name
         post = post.__dict__
         post.pop('author_id')
         post['author'] = author_name
-        post['tags'] = taglist
+        post['tags'] = [tag.name for tag in post.tags]
         post.pop('_sa_instance_state', None)
         post['published_date'] = post['published_date']\
             .strftime('%d.%m.%Y')

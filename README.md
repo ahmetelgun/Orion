@@ -59,12 +59,8 @@ Returns post list. Supports searching by page number or tag name.
         "name": "string:Post name",
         "published_date": "string:dd.mm.yyyy",
         "tags": [
-            {
-                "name": "string:tag_name"
-            },
-            {
-                "name": "string:tag_name"
-            },
+            "string:tag_name",
+            "string:tag_name"
         ]   
     ] 
 }
