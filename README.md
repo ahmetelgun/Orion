@@ -90,12 +90,8 @@ Returns selected post.
     "name": "string:post_name",
     "published_date": "string:dd.mm.yyyy",
     "tags": [
-        {
-            "name": "string:tag_name"
-        },
-        {
-            "name": "string:tag_name"
-        }
+        "string:tag_name",
+        "string:tag_name"
     ],
     "text": "string:post_text"
 }

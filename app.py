@@ -112,11 +112,7 @@ def post(year, month, day, name):
     post = session.query(Post).filter_by(endpoint=endpoint).first()
     if post:
         res = post.__dict__
-        tags = [tag.__dict__ for tag in post.tags]
-        for tag in tags:
-            tag.pop('_sa_instance_state', None)
-            tag.pop('id')
-        res['tags'] = tags
+        res['tags'] = [tag.name for tag in post.tags]
         res['published_date'] = res['published_date']\
             .strftime('%d.%m.%Y')
         res.pop('_sa_instance_state', None)
