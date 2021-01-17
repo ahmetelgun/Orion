@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify, make_response
 from sqlalchemy import create_engine, and_
 from models import Post, Author, Tag, CustomPage
-from config import database_url, posts_per_page
+from config import database_url, posts_per_page, SECRET_KEY
 from werkzeug.security import check_password_hash
 import datetime
 from auth import set_token_to_user, create_token, is_login
@@ -28,7 +28,7 @@ def create_response(body, token=""):
 
 @app.route('/login', methods=["POST"])
 def login():
-    user = is_login(request, session)
+    user = is_login(request, session, SECRET_KEY)
     if user:
         return create_response({"login": True}, user.token), 200
     try:
@@ -41,7 +41,7 @@ def login():
     if user:
         if check_password_hash(user.password, password):
             expiration_time = datetime.datetime.now() + datetime.timedelta(days=1)
-            token = create_token(user.username, expiration_time)
+            token = create_token(user.username, expiration_time, SECRET_KEY)
             set_token_to_user(user, token, session)
             return create_response({"login": True}, token), 200
     return create_response({"login": False, "message": "invalid username or password"}), 401
@@ -49,7 +49,7 @@ def login():
 
 @app.route('/logout', methods=["POST"])
 def logout():
-    user = is_login(request, session)
+    user = is_login(request, session, SECRET_KEY)
     if user:
         user.token = ""
         session.add(user)
@@ -60,7 +60,7 @@ def logout():
 
 @app.route('/posts', methods=["GET"])
 def posts():
-    user = is_login(request, session)
+    user = is_login(request, session, SECRET_KEY)
     total_number_of_page = 1
     postslist = []
     tag = request.args.get('tag', default=None, type=str)
@@ -107,7 +107,7 @@ def posts():
 
 @app.route('/<int:year>/<int:month>/<int:day>/<string:name>', methods=["GET"])
 def post(year, month, day, name):
-    user = is_login(request, session)
+    user = is_login(request, session, SECRET_KEY)
     endpoint = f"/{year}/{month}/{day}/{name}"
     post = session.query(Post).filter_by(endpoint=endpoint).first()
     if post:
@@ -128,7 +128,7 @@ def post(year, month, day, name):
 
 @app.route('/taglist', methods=["GET"])
 def taglist():
-    user = is_login(request, session)
+    user = is_login(request, session, SECRET_KEY)
     tags_all = session.query(Tag).all()
     tags = [tag.name for tag in tags_all]
     if user:
@@ -138,7 +138,7 @@ def taglist():
 
 @app.route('/createpost', methods=["POST"])
 def addpost():
-    user = is_login(request, session)
+    user = is_login(request, session, SECRET_KEY)
     if not user:
         return create_response({"message": "unauthorized request"}), 401
 
@@ -175,7 +175,7 @@ def addpost():
 
 @app.route('/editpost', methods=["POST"])
 def editpost():
-    user = is_login(request, session)
+    user = is_login(request, session, SECRET_KEY)
     if not user:
         return create_response({"message": "unauthorized request"}), 401
     try:
@@ -208,7 +208,7 @@ def editpost():
 
 @app.route('/createtag', methods=["POST"])
 def addtag():
-    user = is_login(request, session)
+    user = is_login(request, session, SECRET_KEY)
     if not user:
         return create_response({"message": "unauthorized request"}), 401
     try:
@@ -227,7 +227,7 @@ def addtag():
 # for custom pages like about or contact
 @app.route('/<string:custom>', methods=["GET"])
 def customPages(custom):
-    user = is_login(request, session)
+    user = is_login(request, session, SECRET_KEY)
     page = session.query(CustomPage).filter_by(endpoint=f"/{custom}").first()
     if page:
         res = page.__dict__
@@ -244,7 +244,7 @@ def customPages(custom):
 
 @app.route('/createcustompage', methods=["POST"])
 def createCustomPage():
-    user = is_login(request, session)
+    user = is_login(request, session, SECRET_KEY)
     if not user:
         return create_response({"message": "unauthorized request"}), 401
     try:

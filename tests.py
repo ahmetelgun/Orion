@@ -1,7 +1,6 @@
 import unittest
 import jwt
 import datetime
-from config import SECRET_KEY
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from models import Base, Author, Tag, CustomPage
@@ -12,6 +11,7 @@ import json
 from models import Post
 import datetime
 
+SECRET_KEY = "secret"
 
 def create_db():
     global session
@@ -56,7 +56,7 @@ def create_db():
 
 def login_user(user, session):
     expiration_time = datetime.datetime.now() + datetime.timedelta(days=1)
-    token = create_token(user.username, expiration_time)
+    token = create_token(user.username, expiration_time, SECRET_KEY)
     set_token_to_user(user, token, session)
 
 
@@ -294,7 +294,7 @@ class CreateTokenTestCase(unittest.TestCase):
         time = datetime.datetime(5, 5, 1)
         token = jwt.encode(
             {"username": "a", "exp": time.timestamp()}, SECRET_KEY, algorithm="HS256").decode("utf-8")
-        self.assertEqual(create_token("a", time), token)
+        self.assertEqual(create_token("a", time, SECRET_KEY), token)
 
 
 class RegisterUserTestCase(unittest.TestCase):
