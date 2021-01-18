@@ -1,11 +1,10 @@
+from datetime import datetime as dtdt
+import html
 import jwt
+from werkzeug.security import generate_password_hash
+from config import database_url
 import datetime as dt
 from models import Author, create_session
-from werkzeug.security import generate_password_hash
-import html
-from sqlalchemy import create_engine
-from config import database_url
-from datetime import datetime as dtdt
 
 def set_token_to_user(session, user, token):
     user.token = token
