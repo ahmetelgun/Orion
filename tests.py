@@ -90,23 +90,6 @@ class AuthPyTestCase(unittest.TestCase):
     def test_register_user(self):
         session, _, _ = create_db()
 
-        self.assertEqual(register_user(session, "Saruman", "crazyboy"), 0)
-        self.assertEqual(register_user(
-            session, "Saruman", password="gandalfscum"), 0)
-        self.assertEqual(register_user(
-            session, username="crazyboy", password="gandalfscum"), 0)
-        self.assertEqual(register_user(
-            session, "Sa", "crazyboy", "gandalfscum"), 1)
-        self.assertEqual(register_user(
-            session, "SarumanSarumanSarumanSarumanSaruman", "crazyboy", "gandalfscum"), 1)
-        self.assertEqual(register_user(
-            session, "Saruman", "cr", "gandalfscum"), 2)
-        self.assertEqual(register_user(
-            session, "Saruman", "crazyboycrazyboycrazyboycrazyboycrazyboy", "gandalfscum"), 2)
-        self.assertEqual(register_user(
-            session, "Saruman", "crazyboy", "gandalf"), 3)
-        self.assertEqual(register_user(
-            session, "Saruman", "crazyboy", "gandalfscumgandalfscumgandalfscum"), 3)
         self.assertEqual(register_user(
             session, "Saruman", "gandalf", "gandalfscum"), 4)
         self.assertEqual(register_user(
