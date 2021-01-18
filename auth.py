@@ -58,7 +58,12 @@ def is_login(session, token, SECRET_KEY):
     return user
 
 
-def register_user(session, name=None, username=None, password=None):
+def register_user():
+    name = input("name: ")
+    username = input("username: ")
+    password = input("password: ")
+    session = create_session(database_url)
+    
     if name is None or username is None or password is None:
         print("Please enter your name, username and password")
         return 0
@@ -88,8 +93,4 @@ def register_user(session, name=None, username=None, password=None):
 
 
 if __name__ == "__main__":
-    name = input("name: ")
-    username = input("username: ")
-    password = input("password: ")
-    session = create_session(database_url)
-    register_user(session, name=name, username=username, password=password)
+    register_user()
