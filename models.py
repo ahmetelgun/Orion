@@ -1,16 +1,14 @@
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Table
-from sqlalchemy import create_engine
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Table, create_engine
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship
-from config import database_url
-from sqlalchemy.orm import sessionmaker
-
+from sqlalchemy.orm import relationship, sessionmaker
 from werkzeug.security import generate_password_hash, check_password_hash
+from config import database_url
 
 Base = declarative_base()
 
 
-def create_session(engine):
+def create_session(database_url):
+    engine = create_engine(database_url)
     Session = sessionmaker(bind=engine)
     session = Session()
     return session
