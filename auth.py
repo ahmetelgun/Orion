@@ -6,6 +6,7 @@ from config import database_url
 import datetime as dt
 from models import Author, create_session
 
+
 def set_token_to_user(session, user, token):
     user.token = token
     session.add(user)
@@ -58,26 +59,7 @@ def is_login(session, token, SECRET_KEY):
     return user
 
 
-def register_user():
-    name = input("name: ")
-    username = input("username: ")
-    password = input("password: ")
-    session = create_session(database_url)
-    
-    if name is None or username is None or password is None:
-        print("Please enter your name, username and password")
-        return 0
-    if len(name) < 3 or len(name) > 32:
-        print("name must be between 3 and 32 characters")
-        return 1
-    if len(username) < 3 or len(username) > 32:
-        print("username must be between 3 and 32 characters")
-        return 2
-    if len(password) < 8 or len(password) > 32:
-        print("password must be between 8 and 32 digits")
-        return 3
-    username = html.escape(username)
-    name = html.escape(name)
+def register_user(session, name, username, password):
     try:
         if session.query(Author).filter_by(username=username).first() is not None:
             print("This username already exist")
@@ -92,5 +74,24 @@ def register_user():
     return user
 
 
+def input_user():
+    name = input("name: ")
+    while len(name) < 3 or len(name) > 32:
+        print("name must be between 3 and 32 characters")
+        name = input("name: ")
+    username = input("username: ")
+    while len(username) < 3 or len(username) > 32:
+        print("username must be between 3 and 32 characters")
+        username = input("username: ")
+    password = input("password: ")
+    while len(password) < 8 or len(password) > 32:
+        print("password must be between 8 and 32 digits")
+        password = input("password: ")
+    session = create_session(database_url)
+    username = html.escape(username)
+    name = html.escape(name)
+    register_user(session, name, username, password)
+
+
 if __name__ == "__main__":
-    register_user()
+    input_user()
