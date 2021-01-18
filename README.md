@@ -10,6 +10,7 @@ git clone https://github.com/ahmetelgun/Orion.git
 cd Orion
 # (Optional) create and activate new virtualenv. For virtualenv, see https://www.geeksforgeeks.org/python-virtual-environment/
 pip install -r requirements.txt
+python install.py
 ```
 # Run
 
