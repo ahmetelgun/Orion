@@ -16,7 +16,7 @@ def set_token_to_user(session, user, token):
 def create_token(username, expiry_time, SECRET_KEY):
     token = jwt.encode(
         {"username": username, "exp": expiry_time.timestamp()}, SECRET_KEY, algorithm="HS256")
-    return token.decode("utf-8")
+    return token
 
 
 def is_time_expire(expiry_time):

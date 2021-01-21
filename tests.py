@@ -29,7 +29,7 @@ class AuthPyTestCase(unittest.TestCase):
     def test_create_token(self):
         time = dtdt(5, 5, 1)
         token = jwt.encode(
-            {"username": "a", "exp": time.timestamp()}, SECRET_KEY, algorithm="HS256").decode("utf-8")
+            {"username": "a", "exp": time.timestamp()}, SECRET_KEY, algorithm="HS256")
         self.assertEqual(create_token("a", time, SECRET_KEY), token)
 
     def test_is_time_expire(self):
