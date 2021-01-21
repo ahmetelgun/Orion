@@ -70,7 +70,7 @@ def register_user(session, name, username, password):
     user.password = generate_password_hash(password)
     session.add(user)
     session.commit()
-    print("user is created")
+    print("user created")
     return user
 
 
