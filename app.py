@@ -151,7 +151,7 @@ def addpost():
     if session.query(Post).filter_by(endpoint=endpoint).first():
         return create_response({"message": "you can publish a post with the same name in one day"}, user.token), 409
 
-    post_excerpt = post_text[:50]
+    post_excerpt = " ".join(post_text.split()[:50])
     post = Post(name=post_name, published_date=published_date,
                 text=post_text, excerpt=post_excerpt, endpoint=endpoint)
 
