@@ -1,4 +1,3 @@
-Pipfile
+Pipfile*
 *.db*
 __pycache__
-config.py
