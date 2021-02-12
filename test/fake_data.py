@@ -1,9 +1,11 @@
 import os
-import sqlalchemy
 from sqlalchemy.orm import sessionmaker
 from werkzeug.security import generate_password_hash
 
+from controllers.token import create_user_token
+from controllers.helpers import get_time_after
 import models
+
 
 def create_test_database():
     TEST_DB = 'sqlite:///test.db'
@@ -11,15 +13,28 @@ def create_test_database():
     engine = models.create_database(TEST_DB, True)
     return engine
 
+
 def create_test_data(session):
     user1_info = {
-        'name': 'Ahmet Elgun',
-        'username': 'ahmet',
+        'name': 'Gandalf the White',
+        'username': 'mithrandir',
         'password': generate_password_hash('12345678')
     }
     user1 = models.Author(**user1_info)
-    session.add(user1)
+
+    expire = get_time_after(1, 0, 0)
+    token = create_user_token('saruman', expire, os.getenv('SECRET_KEY'))
+    user2_info = {
+        'name': 'Saruman',
+        'username': 'saruman',
+        'password': generate_password_hash('qweqweqwe'),
+        'token': token
+    }
+    user2 = models.Author(**user2_info)
+
+    session.add_all([user1, user2])
     session.commit()
+
 
 def test_db():
     engine = create_test_database()

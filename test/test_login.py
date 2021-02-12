@@ -1,23 +1,26 @@
 import unittest
-from app import app
+
 from .fake_data import test_db
+from app import app
+from models import Author
+
 
 class TestLogin(unittest.TestCase):
     def setUp(self):
         self.client = app.test_client()
         self.session = test_db()
-        
+
     def test_invalid_input(self):
         self.res = self.client.post('/login', json={})
         self.assertEqual(self.res.status_code, 400)
 
         self.res = self.client.post('/login', json={
-            'username': 'ahmet'
+            'username': 'mithrandir'
         })
         self.assertEqual(self.res.status_code, 400)
 
         self.res = self.client.post('/login', json={
-            'usernamee': 'ahmet'
+            'usernamee': 'mithrandir'
         })
         self.assertEqual(self.res.status_code, 400)
 
@@ -32,13 +35,13 @@ class TestLogin(unittest.TestCase):
         self.assertEqual(self.res.status_code, 400)
 
         self.res = self.client.post('/login', json={
-            'usernamee': 'ahmet',
+            'usernamee': 'mithrandir',
             'password': '12345678'
         })
         self.assertEqual(self.res.status_code, 400)
 
         self.res = self.client.post('/login', json={
-            'username': 'ahmet',
+            'username': 'mithrandir',
             'passwordd': '12345678'
         })
         self.assertEqual(self.res.status_code, 400)
@@ -51,27 +54,50 @@ class TestLogin(unittest.TestCase):
         self.assertEqual(self.res.status_code, 401)
 
         self.res = self.client.post('/login', json={
-            'username': 'ahmett',
+            'username': 'mithrandirr',
             'password': '12345678'
         })
         self.assertEqual(self.res.status_code, 401)
 
     def test_wrong_password(self):
         self.res = self.client.post('/login', json={
-            'username': 'ahmet',
+            'username': 'mithrandir',
             'password': ''
         })
         self.assertEqual(self.res.status_code, 401)
 
         self.res = self.client.post('/login', json={
-            'username': 'ahmet',
+            'username': 'mithrandir',
+            'password': '123456789'
+        })
+        self.assertEqual(self.res.status_code, 401)
+
+        self.client.set_cookie('localhost', 'token', 'asdasd')
+        self.res = self.client.post('/login', json={
+            'username': 'mithrandir',
             'password': '123456789'
         })
         self.assertEqual(self.res.status_code, 401)
 
     def test_success_login(self):
+        # login with username and password
         self.res = self.client.post('/login', json={
-            'username': 'ahmet',
+            'username': 'mithrandir',
+            'password': '12345678'
+        })
+        self.assertEqual(self.res.status_code, 200)
+
+        # login with token
+        user2 = self.session.query(Author).filter_by(username='saruman').first()
+        self.client.set_cookie('localhost', 'token', user2.token)
+        self.res = self.client.post('/login')
+        self.assertEqual(self.res.status_code, 200)
+
+        # login with token but wrong username and password
+        user2 = self.session.query(Author).filter_by(username='saruman').first()
+        self.client.set_cookie('localhost', 'token', user2.token)
+        self.res = self.client.post('/login', json={
+            'username': 'mithrandir',
             'password': '12345678'
         })
         self.assertEqual(self.res.status_code, 200)

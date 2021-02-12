@@ -1,7 +1,7 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request
 from dotenv import load_dotenv
-from models import Author
 import os
+
 import controllers
 
 load_dotenv()
@@ -15,7 +15,7 @@ def index():
 
 
 @app.route('/login', methods=['POST'])
-def hello_world():
+def login():
     return controllers.login(request)
 
 

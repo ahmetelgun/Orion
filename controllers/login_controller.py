@@ -1,12 +1,21 @@
 import os
 from werkzeug.security import check_password_hash
 
-from .helpers import create_session, response, create_token_cookie, get_time_after
 from models import Author
+from .authentication import is_login
+from .helpers import create_session, response, create_token_cookie, get_time_after
 from .token import create_user_token
 
 
 def login(request):
+    if is_login(request.cookies.get('token'), os.getenv('SECRET_KEY')):
+        return response(
+            data={
+                'status': 'success',
+                'message': 'Login success'},
+            return_code=200,
+            cookies=create_token_cookie(request.cookies.get('token'))
+        )
     session = create_session(os.getenv('DATABASE_URL'))
     data = request.json
     try:
