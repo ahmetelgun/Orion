@@ -1,6 +1,7 @@
 import os
 import sqlalchemy
 from sqlalchemy.orm import sessionmaker
+from werkzeug.security import generate_password_hash
 
 import models
 
@@ -11,7 +12,12 @@ def create_test_database():
     return engine
 
 def create_test_data(session):
-    user1 = models.Author(name='Ahmet Elgun', username='ahmet', password='12345678')
+    user1_info = {
+        'name': 'Ahmet Elgun',
+        'username': 'ahmet',
+        'password': generate_password_hash('12345678')
+    }
+    user1 = models.Author(**user1_info)
     session.add(user1)
     session.commit()
 
