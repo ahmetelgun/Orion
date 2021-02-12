@@ -1,6 +1,5 @@
 import os
-from flask import jsonify
-from helpers import create_session
+from .helpers import create_session, response, create_token_cookie
 from models import Author
 from werkzeug.security import check_password_hash
 
@@ -11,20 +10,29 @@ def login(request):
         username = data['username']
         password = data['password']
     except:
-        return jsonify({
-            'status': 'error', 
-            'message': 'Username or password invalid'
-        }), 400
+        return response(
+            data={
+                'status': 'error', 
+                'message': 'Username or password invalid'},
+            return_code=400,
+            cookies=create_token_cookie()
+        )
 
     user = session.query(Author).filter_by(username=username).first()
-    
-    if user and check_password_hash(user.password, password):
-        return jsonify({
-            'status': 'success',
-            'message': 'Login success'
-        }), 200
 
-    return jsonify({
-        'status': 'error',
-        'message': 'Username or password wrong'
-    }), 401
+    if user and check_password_hash(user.password, password):
+        return response(
+            data={
+                'status': 'success',
+                'message': 'Login success'},
+            return_code=200,
+            cookies=create_token_cookie()
+        )
+
+    return response(
+        data={
+            'status': 'error',
+            'message': 'Username or password wrong'},
+        return_code=401,
+        cookies=create_token_cookie()
+    )
