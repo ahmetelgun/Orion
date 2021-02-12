@@ -9,10 +9,13 @@ load_dotenv()
 DATABASE_URL = os.getenv('DATABASE_URL')
 
 
-def create_database(DATABASE_URL):
+def create_database(DATABASE_URL, testing = False):
     try:
         engine = create_engine(DATABASE_URL, echo=False)
+        if testing:
+            Base.metadata.drop_all(bind=engine)
         Base.metadata.create_all(engine)
+        return engine
     except Exception as e:
         print(e)
 
