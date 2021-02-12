@@ -2,7 +2,7 @@ import os
 from werkzeug.security import check_password_hash
 
 from models import Author
-from .authentication import is_login
+from .authentication import is_login, set_token_to_user
 from .helpers import create_session, response, create_token_cookie, get_time_after
 from .token import create_user_token
 
@@ -36,6 +36,7 @@ def login(request):
         expire = get_time_after(5, 0, 0)
         token = create_user_token(
             user.username, expire, os.getenv('SECRET_KEY'))
+        set_token_to_user(user.username, token)
         return response(
             data={
                 'status': 'success',

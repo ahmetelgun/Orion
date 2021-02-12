@@ -19,3 +19,13 @@ def is_login(token, secret):
         if time > datetime.now().timestamp():
             return user
     return False
+
+def set_token_to_user(username, token):
+    session = create_session(os.getenv('DATABASE_URL'))
+    user = session.query(Author).filter_by(username=username).first()
+    if user:
+        user.token = token
+        session.add(user)
+        session.commit()
+        return True
+    return False
