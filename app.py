@@ -19,5 +19,10 @@ def login():
     return controllers.login(request)
 
 
+@app.route('/logout', methods=['POST'])
+def logout():
+    return controllers.logout(request)
+
+
 if __name__ == "__main__":
     app.run()

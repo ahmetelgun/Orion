@@ -3,16 +3,16 @@ import jwt
 import datetime
 
 from .helpers import create_session, get_time_after
-from .token import create_user_token
+from .token import create_user_token, decode_token
 from models import Author
 
 
 def is_login(token, secret):
-    try:
-        data = jwt.decode(token, secret, algorithms='HS256')
-        username = data['username']
-        time = data['time']
-    except:
+    payload = decode_token(token, secret)
+    if payload:
+        username = payload['username']
+        time = payload['time']
+    else:
         return False
     session = create_session(os.getenv('DATABASE_URL'))
     user = session.query(Author).filter_by(username=username).first()
