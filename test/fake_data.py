@@ -32,7 +32,17 @@ def create_test_data(session):
     }
     user2 = models.Author(**user2_info)
 
-    session.add_all([user1, user2])
+    expire = get_time_after(0, 1, 0)
+    token = create_user_token('theoden', expire, os.getenv('SECRET_KEY'))
+    user3_info = {
+        'name': 'Theoden',
+        'username': 'theoden',
+        'password': generate_password_hash('iamking'),
+        'token': token
+    }
+    user3 = models.Author(**user3_info)
+
+    session.add_all([user1, user2, user3])
     session.commit()
 
 
