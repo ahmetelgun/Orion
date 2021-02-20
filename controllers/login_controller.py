@@ -3,13 +3,14 @@ from werkzeug.security import check_password_hash
 
 from models import Author
 from .authentication import is_login, set_token_to_user, refresh_jwt
-from .helpers import create_session, response, create_token_cookie, get_time_after
+from .helpers import response, create_token_cookie, get_time_after
 from .token import create_user_token
 
 
-def login(request):
-    if is_login(request.cookies.get('token'), os.getenv('SECRET_KEY')):
-        token = refresh_jwt(request.cookies.get('token'), os.getenv('SECRET_KEY'), 12)
+def login(request, session):
+    if is_login(request.cookies.get('token'), os.getenv('SECRET_KEY'), session):
+        token = refresh_jwt(request.cookies.get('token'),
+                            os.getenv('SECRET_KEY'), 12, session)
         return response(
             data={
                 'status': 'success',
@@ -17,7 +18,6 @@ def login(request):
             return_code=200,
             cookies=create_token_cookie(token)
         )
-    session = create_session(os.getenv('DATABASE_URL'))
     data = request.json
     try:
         username = data['username']
@@ -37,7 +37,7 @@ def login(request):
         expire = get_time_after(5, 0, 0)
         token = create_user_token(
             user.username, expire, os.getenv('SECRET_KEY'))
-        set_token_to_user(user.username, token)
+        set_token_to_user(user.username, token, session)
         return response(
             data={
                 'status': 'success',

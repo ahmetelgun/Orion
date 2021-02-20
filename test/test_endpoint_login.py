@@ -1,16 +1,15 @@
 import unittest
-import os
 
 from .fake_data import test_db
-from app import app
+import app
 from models import Author
-from controllers.helpers import create_session
 
 
 class TestLogin(unittest.TestCase):
     def setUp(self):
-        self.client = app.test_client()
+        self.client = app.app.test_client()
         self.session = test_db()
+        app.session = self.session
 
     def test_invalid_input(self):
         res = self.client.post('/login', json={})
@@ -90,7 +89,8 @@ class TestLogin(unittest.TestCase):
         self.assertEqual(res.status_code, 200)
 
         # login with token
-        user2 = self.session.query(Author).filter_by(username='saruman').first()
+        user2 = self.session.query(Author).filter_by(
+            username='saruman').first()
         self.client.set_cookie('localhost', 'token', user2.token)
         res = self.client.post('/login')
         self.assertEqual(res.status_code, 200)
@@ -101,7 +101,8 @@ class TestLogin(unittest.TestCase):
         self.assertEqual(token, user2.token)
 
         # login with token but wrong username and password
-        user2 = self.session.query(Author).filter_by(username='saruman').first()
+        user2 = self.session.query(Author).filter_by(
+            username='saruman').first()
         self.client.set_cookie('localhost', 'token', user2.token)
         res = self.client.post('/login', json={
             'username': 'mithrandir',
@@ -110,12 +111,20 @@ class TestLogin(unittest.TestCase):
         self.assertEqual(res.status_code, 200)
 
         # login with token but refresh token
-        user3 = self.session.query(Author).filter_by(username='theoden').first()
+        user3 = self.session.query(Author).filter_by(
+            username='theoden').first()
+        old_token = user3.token
         self.client.set_cookie('localhost', 'token', user3.token)
         res = self.client.post('/login')
         self.assertEqual(res.status_code, 200)
-        token = next(
+
+        # check new token after token refresh
+        new_token = next(
             (cookie.value for cookie in self.client.cookie_jar if cookie.name == 'token'),
             None
         )
-        self.assertNotEqual(token, user3.token)
+        self.assertNotEqual(old_token, new_token)
+        # check new token from db
+        user3 = self.session.query(Author).filter_by(
+            username='theoden').first()
+        self.assertEqual(user3.token, new_token)

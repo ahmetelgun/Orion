@@ -1,16 +1,15 @@
 import unittest
-import os
 
 from .fake_data import test_db
-from app import app
+import app
 from models import Author
-from controllers.helpers import create_session
 
 
-class TestLogin(unittest.TestCase):
+class TestLogout(unittest.TestCase):
     def setUp(self):
-        self.client = app.test_client()
+        self.client = app.app.test_client()
         self.session = test_db()
+        app.session = self.session
 
     def test_not_login(self):
         # no cookie

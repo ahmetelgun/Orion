@@ -12,11 +12,11 @@ class TestSetTokenToUser(unittest.TestCase):
         self.session = test_db()
 
     def test_wrong_username(self):
-        self.assertFalse(set_token_to_user('sarumann', 'token'))
+        self.assertFalse(set_token_to_user('sarumann', 'token', self.session))
 
     def test_success(self):
-        self.assertTrue(set_token_to_user('saruman', 'token'))
+        self.assertTrue(set_token_to_user('saruman', 'token', self.session))
         
-        set_token_to_user('saruman', 'token2')
+        set_token_to_user('saruman', 'token2', self.session)
         user = self.session.query(Author).filter_by(username='saruman').first()
         self.assertEqual(user.token, 'token2')

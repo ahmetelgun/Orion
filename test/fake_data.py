@@ -1,6 +1,7 @@
 import os
 from sqlalchemy.orm import sessionmaker
 from werkzeug.security import generate_password_hash
+import datetime
 
 from controllers.token import create_user_token
 from controllers.helpers import get_time_after
@@ -8,7 +9,7 @@ import models
 
 
 def create_test_database():
-    TEST_DB = 'sqlite:///test.db'
+    TEST_DB = 'sqlite:///:memory:'
     os.environ['DATABASE_URL'] = TEST_DB
     engine = models.create_database(TEST_DB, True)
     return engine
@@ -42,7 +43,34 @@ def create_test_data(session):
     }
     user3 = models.Author(**user3_info)
 
-    session.add_all([user1, user2, user3])
+    post1 = models.Post(
+        name='What is CORS?',
+        publish_date=datetime.datetime(2021, 1, 1),
+        endpoint='what-is-cors',
+        text='cross origin resource sharing',
+        excerpt='cors',
+        author=user1
+    )
+
+    post2 = models.Post(
+        name='What is Fetch?',
+        publish_date=datetime.datetime(2021, 1, 2),
+        endpoint='what-is-fetch',
+        text='es6 feature',
+        excerpt='fetch',
+        author=user1
+    )
+
+    post3 = models.Post(
+        name='What is Linux?',
+        publish_date=datetime.datetime(2021, 1, 3),
+        endpoint='what-is-linux',
+        text='a kernel',
+        excerpt='linux',
+        author=user2
+    )
+
+    session.add_all([user1, user2, user3, post1, post2, post3])
     session.commit()
 
 
