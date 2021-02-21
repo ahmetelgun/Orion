@@ -35,6 +35,13 @@ def posts():
     return resp
 
 
+@app.route('/<post_endpoint>')
+def post_detail(post_endpoint):
+    resp = controllers.post_detail(request, session, post_endpoint)
+    session.close()
+    return resp
+
+
 if __name__ == "__main__":
     load_dotenv()
     session = create_session(os.getenv('DATABASE_URL'))
