@@ -66,6 +66,7 @@ class Tag(Base):
 
     id = Column(Integer, primary_key=True)
     name = Column(String, unique=True, nullable=False)
+    endpoint = Column(String, unique=True, nullable=False)
     posts = relationship(
         "Post", secondary=link, back_populates="tags")
 
