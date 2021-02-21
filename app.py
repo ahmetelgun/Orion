@@ -5,7 +5,6 @@ import os
 import controllers
 from controllers.helpers import create_session
 
-load_dotenv()
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY')
 
@@ -17,15 +16,20 @@ def index():
 
 @app.route('/login', methods=['POST'])
 def login():
-    return controllers.login(request, session)
+    resp = controllers.login(request, session)
+    session.close()
+    return resp
 
 
 @app.route('/logout', methods=['POST'])
 def logout():
-    return controllers.logout(request, session)
+    resp = controllers.logout(request, session)
+    session.close()
+    return resp
 
 
 
 if __name__ == "__main__":
+    load_dotenv()
     session = create_session(os.getenv('DATABASE_URL'))
     app.run()
