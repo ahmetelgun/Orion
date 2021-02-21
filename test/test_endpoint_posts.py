@@ -57,3 +57,62 @@ class TestPosts(unittest.TestCase):
         self.assertEqual(res.status_code, 200)
         data = res.json
         self.assertEqual(data['data']['current_page'], 1)
+
+    def test_with_invalid_tag(self):
+        res = self.client.get('/posts?tag=asd')
+        self.assertEqual(res.status_code, 404)
+
+        res = self.client.get('/posts?tag=')
+        self.assertEqual(res.status_code, 200)
+
+    def test_with_valid_tag(self):
+        res = self.client.get('/posts?tag=web_development')
+        self.assertEqual(res.status_code, 200)
+        data = res.json
+        self.assertEqual(len(data['data']['posts']), 2)
+
+        res = self.client.get('/posts?tag=linux')
+        self.assertEqual(res.status_code, 200)
+        data = res.json
+        self.assertEqual(len(data['data']['posts']), 1)
+
+    def test_with_tag_and_page(self):
+        # invalid tag invalid page
+        res = self.client.get('/posts?tag=asd&page=a')
+        self.assertEqual(res.status_code, 404)
+
+        res = self.client.get('/posts?tag=&page=a')
+        self.assertEqual(res.status_code, 200)
+        data = res.json
+        self.assertEqual(data['data']['current_page'], 1)
+
+        # invalid tag valid page
+        res = self.client.get('/posts?page=1&tag=asd')
+        self.assertEqual(res.status_code, 404)
+
+        res = self.client.get('/posts?page=2&tag=')
+        self.assertEqual(res.status_code, 200)
+        data = res.json
+        self.assertEqual(data['data']['current_page'], 2)
+
+        # valid tag invalid page
+        res = self.client.get('/posts?page=a&tag=linux')
+        self.assertEqual(res.status_code, 200)
+        data = res.json
+        self.assertEqual(data['data']['current_page'], 1)
+
+        res = self.client.get('/posts?page=&tag=web_development')
+        self.assertEqual(res.status_code, 200)
+        data = res.json
+        self.assertEqual(data['data']['current_page'], 1)
+
+        # valid tag valid page
+        res = self.client.get('/posts?page=1&tag=linux')
+        self.assertEqual(res.status_code, 200)
+        data = res.json
+        self.assertEqual(data['data']['current_page'], 1)
+
+        res = self.client.get('/posts?page=2&tag=post')
+        self.assertEqual(res.status_code, 200)
+        data = res.json
+        self.assertEqual(data['data']['current_page'], 2)

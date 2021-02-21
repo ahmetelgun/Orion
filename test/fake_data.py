@@ -43,13 +43,34 @@ def create_test_data(session):
     }
     user3 = models.Author(**user3_info)
 
+    tag1 = models.Tag(
+        name='Web development',
+        endpoint='web_development'
+    )
+
+    tag2 = models.Tag(
+        name='JavaScript',
+        endpoint='javascript'
+    )
+
+    tag3 = models.Tag(
+        name='Linux',
+        endpoint='linux'
+    )
+
+    tag4 = models.Tag(
+        name='Post',
+        endpoint='post'
+    )
+
     post1 = models.Post(
         name='What is CORS?',
         publish_date=datetime.datetime(2021, 1, 1),
         endpoint='what-is-cors',
         text='cross origin resource sharing',
         excerpt='cors',
-        author=user1
+        author=user1,
+        tags=[tag1, tag4]
     )
 
     post2 = models.Post(
@@ -58,7 +79,8 @@ def create_test_data(session):
         endpoint='what-is-fetch',
         text='es6 feature',
         excerpt='fetch',
-        author=user1
+        author=user1,
+        tags=[tag1, tag2, tag4]
     )
 
     post3 = models.Post(
@@ -67,10 +89,12 @@ def create_test_data(session):
         endpoint='what-is-linux',
         text='a kernel',
         excerpt='linux',
-        author=user2
+        author=user2,
+        tags=[tag3, tag4]
     )
 
-    session.add_all([user1, user2, user3, post1, post2, post3])
+    session.add_all([user1, user2, user3, post1, post2,
+                     post3, tag1, tag2, tag3, tag4])
     session.commit()
 
 
