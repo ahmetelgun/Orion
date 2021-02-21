@@ -28,6 +28,12 @@ def logout():
     return resp
 
 
+@app.route('/posts', methods=['GET'])
+def posts():
+    resp = controllers.posts(request, session)
+    session.close()
+    return resp
+
 
 if __name__ == "__main__":
     load_dotenv()

@@ -58,7 +58,7 @@ class Post(Base):
         back_populates="posts")
 
     def __repr__(self):
-        return repr({'id': self.id, 'name': self.name, 'author': self.author.name})
+        return repr({'id': self.id, 'name': self.name, 'author': self.author.name, 'tags': self.tags})
 
 
 class Tag(Base):
