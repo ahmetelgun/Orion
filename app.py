@@ -8,6 +8,11 @@ from controllers.helpers import create_session
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY')
 
+@app.after_request
+def apply_caching(response):
+    response.headers["Access-Control-Allow-Origin"] = os.getenv('FRONTEND_URL')
+    return response
+
 
 @app.route('/', methods=['GET'])
 def index():
