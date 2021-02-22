@@ -8,6 +8,9 @@ from controllers.helpers import create_session
 app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY')
 
+load_dotenv()
+session = create_session(os.getenv('DATABASE_URL'))
+
 @app.after_request
 def apply_caching(response):
     response.headers["Access-Control-Allow-Origin"] = os.getenv('FRONTEND_URL')
@@ -48,6 +51,4 @@ def post_detail(post_endpoint):
 
 
 if __name__ == "__main__":
-    load_dotenv()
-    session = create_session(os.getenv('DATABASE_URL'))
     app.run()
