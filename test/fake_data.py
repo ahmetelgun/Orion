@@ -43,6 +43,15 @@ def create_test_data(session):
     }
     user3 = models.Author(**user3_info)
 
+    expire = get_time_after(0, 0, -5)
+    token = create_user_token('theoden', expire, os.getenv('SECRET_KEY'))
+    user4 = models.Author(
+        name='Thorin Oakenshield',
+        username='thorin',
+        password=generate_password_hash('goOo0old'),
+        token=token
+    )
+
     tag1 = models.Tag(
         name='Web development',
         endpoint='web_development'
@@ -93,8 +102,8 @@ def create_test_data(session):
         tags=[tag3, tag4]
     )
 
-    session.add_all([user1, user2, user3, post1, post2,
-                     post3, tag1, tag2, tag3, tag4])
+    session.add_all([user1, user2, user3, user4, post1,
+                     post2, post3, tag1, tag2, tag3, tag4])
     session.commit()
 
 
