@@ -43,6 +43,13 @@ def posts():
     return resp
 
 
+@app.route('/createpost', methods=['POST'])
+def create_posts():
+    resp = controllers.create_post(request, session)
+    session.close()
+    return resp
+
+
 @app.route('/<post_endpoint>')
 def post_detail(post_endpoint):
     resp = controllers.post_detail(request, session, post_endpoint)

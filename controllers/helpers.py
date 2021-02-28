@@ -2,6 +2,9 @@ import datetime
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from flask import make_response, jsonify
+import string
+import random
+import html
 
 
 def create_session(DATABASE_URL):
@@ -47,3 +50,16 @@ def get_time_after(days, hours, minutes):
     time_after = now + \
         datetime.timedelta(days=days, hours=hours, minutes=minutes)
     return time_after.timestamp()
+
+
+def generate_endpoint_from_name(name, exist=False):
+    name = name.translate(str.maketrans('', '', string.punctuation))
+    name = name.lower()
+    name = name + ' '
+    if exist:
+        name += str(random.randint(1000, 9999))
+    return "-".join(name.split())
+
+
+def create_valid_name(name):
+    return html.escape(" ".join(name.split()))
