@@ -7,11 +7,11 @@ from models import Author
 
 
 def is_login(token, secret, session):
-    payload = decode_token(token, secret)
-    if payload:
+    try:
+        payload = decode_token(token, secret)
         username = payload['username']
         time = payload['time']
-    else:
+    except:
         return False
     user = session.query(Author).filter_by(username=username).first()
     if user and user.token == token:
