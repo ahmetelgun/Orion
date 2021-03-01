@@ -118,13 +118,7 @@ class TestLogin(unittest.TestCase):
         res = self.client.post('/login')
         self.assertEqual(res.status_code, 200)
 
-        # check new token after token refresh
-        new_token = next(
-            (cookie.value for cookie in self.client.cookie_jar if cookie.name == 'token'),
-            None
-        )
-        self.assertNotEqual(old_token, new_token)
         # check new token from db
         user3 = self.session.query(Author).filter_by(
             username='theoden').first()
-        self.assertEqual(user3.token, new_token)
+        self.assertNotEqual(user3.token, old_token)
