@@ -5,6 +5,7 @@ from flask import make_response, jsonify
 import string
 import random
 import html
+import os
 
 
 def create_session(DATABASE_URL):
@@ -19,23 +20,26 @@ def create_token_cookie(cookie=None):
         return [
             {
                 'key': 'login',
-                'value': 'true'
+                'value': 'true',
+                'max_age': 60*60*24*2,
+                'httponly': False,
+                'secure': True,
+                'path': '/',
+                'domain': os.getenv('FRONTEND_URL'),
+                'samesite': 'Strict',
             },
             {
                 'key': 'token',
-                'value': cookie
+                'value': cookie,
+                'max_age': 60*60*24*2,
+                'httponly': True,
+                'secure': True,
+                'path': '/',
+                'domain': os.getenv('FRONTEND_URL'),
+                'samesite': 'Strict',
             }
         ]
-    return [
-        {
-            'key': 'login',
-            'value': 'false'
-        },
-        {
-            'key': 'token',
-            'value': ''
-        }
-    ]
+    return []
 
 
 def response(data, return_code, cookies=[]):
