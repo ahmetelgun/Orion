@@ -74,6 +74,7 @@ def create_test_data(session):
     )
 
     post1 = models.Post(
+        id=1,
         name='What is CORS?',
         publish_date=datetime.datetime(2021, 1, 1),
         endpoint='what-is-cors',
@@ -84,6 +85,7 @@ def create_test_data(session):
     )
 
     post2 = models.Post(
+        id=2,
         name='What is Fetch?',
         publish_date=datetime.datetime(2021, 1, 2),
         endpoint='what-is-fetch',
@@ -94,6 +96,7 @@ def create_test_data(session):
     )
 
     post3 = models.Post(
+        id=3,
         name='What is Linux?',
         publish_date=datetime.datetime(2021, 1, 3),
         endpoint='what-is-linux',
@@ -101,6 +104,17 @@ def create_test_data(session):
         excerpt='linux',
         author=user2,
         tags=[tag3, tag4]
+    )
+
+    post4 = models.Post(
+        id=4,
+        name='What is Flask?',
+        publish_date=datetime.datetime(2021, 1, 4),
+        endpoint='what-is-flask',
+        text='a framework',
+        excerpt='flask',
+        author=user2,
+        tags=[tag1, tag3]
     )
 
     session.add_all([user1, user2, user3, user4, post1,
