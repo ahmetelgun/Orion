@@ -22,8 +22,8 @@ class TestPosts(unittest.TestCase):
         self.assertEqual(data['data']['current_page'], 1)
         self.assertEqual(data['data']['total_page'], 2)
 
-        self.assertEqual(data['data']['posts'][0]['name'], 'What is Linux?')
-        self.assertEqual(data['data']['posts'][1]['name'], 'What is Fetch?')
+        self.assertEqual(data['data']['posts'][0]['name'], 'What is Flask?')
+        self.assertEqual(data['data']['posts'][1]['name'], 'What is Linux?')
 
     def test_with_invalid_page(self):
         res = self.client.get('/posts?page')
@@ -74,7 +74,7 @@ class TestPosts(unittest.TestCase):
         res = self.client.get('/posts?tag=linux')
         self.assertEqual(res.status_code, 200)
         data = res.json
-        self.assertEqual(len(data['data']['posts']), 1)
+        self.assertEqual(len(data['data']['posts']), 2)
 
     def test_with_tag_and_page(self):
         # invalid tag invalid page
