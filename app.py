@@ -50,6 +50,13 @@ def create_posts():
     return resp
 
 
+@app.route('/editpost', methods=['POST'])
+def edit_post():
+    resp = controllers.editpost(request, session)
+    session.close()
+    return resp
+
+
 @app.route('/<post_endpoint>')
 def post_detail(post_endpoint):
     resp = controllers.post_detail(request, session, post_endpoint)
