@@ -31,6 +31,11 @@ def create_post(request, session):
             tags = data['tags']
         except:
             tags = []
+        
+        try:
+            excerpt = data['excerpt']
+        except:
+            excerpt = " ".join(text.split()[:20])
     except:
         return response(
             data={
@@ -52,7 +57,7 @@ def create_post(request, session):
         publish_date=datetime.datetime.now(),
         endpoint=endpoint,
         text=text,
-        excerpt=" ".join(text.split()[:20]),
+        excerpt=excerpt,
         author=user,
         tags=tags
     ))
