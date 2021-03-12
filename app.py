@@ -57,6 +57,13 @@ def edit_post():
     return resp
 
 
+@app.route('/deletepost', methods=['POST'])
+def delete_post():
+    resp = controllers.deletepost(request, session)
+    session.close()
+    return resp
+
+
 @app.route('/<post_endpoint>')
 def post_detail(post_endpoint):
     resp = controllers.post_detail(request, session, post_endpoint)

@@ -4,3 +4,4 @@ from .posts_controller import posts
 from .post_detail_controller import post_detail
 from .createpost_controller import create_post
 from .editpost_controller import editpost
+from .deletepost_controller import deletepost
