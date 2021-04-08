@@ -2,7 +2,7 @@ import unittest
 import os
 from flask import json
 
-from .fake_data import test_db
+from ..fake_data import test_db
 import app
 from models import Author
 

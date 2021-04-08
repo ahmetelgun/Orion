@@ -12,6 +12,7 @@ def create_test_database():
     TEST_DB = 'sqlite:///:memory:'
     os.environ['DATABASE_URL'] = TEST_DB
     os.environ['SECRET_KEY'] = "123"
+    os.environ['POSTS_PER_PAGE'] = "2"
     engine = models.create_database(TEST_DB, True)
     return engine
 
