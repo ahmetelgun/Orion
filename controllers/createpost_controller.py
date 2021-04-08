@@ -2,22 +2,17 @@ import os
 import datetime
 
 from .helpers import response, create_token_cookie, generate_endpoint_from_name, create_valid_name
-from .authentication import is_login, refresh_jwt
+from .authentication import refresh_jwt, login_required
 from models import Post, Tag
 
 
 def create_post(request, session):
-    if user := is_login(request.cookies.get('token'), os.getenv('SECRET_KEY'), session):
-        token = refresh_jwt(request.cookies.get('token'),
-                            os.getenv('SECRET_KEY'), 12, session)
+    is_login = login_required(request, session)
+    if is_login['status']:
+        user, token = is_login['user'], is_login['token']
     else:
-        return response(
-            data={
-                'status': 'error',
-                'message': 'Login required'},
-            return_code=401,
-            cookies=create_token_cookie()
-        )
+        return is_login['response']
+
     try:
         data = request.json
         name = create_valid_name(data['name'])
@@ -31,7 +26,7 @@ def create_post(request, session):
             tags = data['tags']
         except:
             tags = []
-        
+
         try:
             excerpt = data['excerpt']
         except:
