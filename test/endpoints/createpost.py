@@ -2,10 +2,10 @@ import unittest
 import jwt
 import os
 
-from ..fake_data import test_db
 import app
 from models import Author, Post
-
+from ..fake_data import test_db
+from ..helpers import test_authentication
 
 class TestCreatePost(unittest.TestCase):
     def setUp(self):
@@ -13,28 +13,8 @@ class TestCreatePost(unittest.TestCase):
         self.session = test_db()
         app.session = self.session
 
-    def test_authentication(self):
-        # no cookie
-        res = self.client.post('/createpost')
-        self.assertEqual(res.status_code, 401)
-
-        # invalid token
-        self.client.set_cookie('localhost', 'token', '123')
-        res = self.client.post('/createpost')
-        self.assertEqual(res.status_code, 401)
-
-        # wrong token
-        token = jwt.encode({'name': 'hello'}, os.getenv('SECRET_KEY'), algorithm='HS256')
-        self.client.set_cookie('localhost', 'token', token)
-        res = self.client.post('/createpost')
-        self.assertEqual(res.status_code, 401)
-
-        # expired token
-        token = self.session.query(Author).filter_by(
-            username='thorin').first().token
-        self.client.set_cookie('localhost', 'token', token)
-        res = self.client.post('/createpost')
-        self.assertEqual(res.status_code, 401)
+    def test(self):
+        test_authentication(self, '/createpost')
 
     def test_invalid_data_(self):
         token = self.session.query(Author).filter_by(
