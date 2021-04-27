@@ -71,5 +71,12 @@ def post_detail(post_endpoint):
     return resp
 
 
+@app.route('/createtag', methods=['POST'])
+def create_tag():
+    resp = controllers.create_tag(request, session)
+    session.close()
+    return resp
+
+
 if __name__ == "__main__":
     app.run()
