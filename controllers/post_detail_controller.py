@@ -21,7 +21,7 @@ def post_detail(request, session, endpoint):
                 'endpoint': post.endpoint,
                 'text': post.text,
                 'author': {'name': post.author.name, 'username': post.author.username},
-                'tags': [{'name': tag.name, 'endpoint': tag.endpoint} for tag in post.tags]
+                'tags': [{'name': tag.name} for tag in post.tags]
             }
         }
         return response(data, 200, create_token_cookie(token))

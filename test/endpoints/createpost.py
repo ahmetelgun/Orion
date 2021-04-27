@@ -29,14 +29,14 @@ class TestCreatePost(unittest.TestCase):
         res = self.client.post('/createpost', json={
             'namee': 'hello',
             'text': 'lorem ipsum dolor sit amet',
-            'tags': ['linux', 'javascript']
+            'tags': ['Linux', 'JavaScript']
         })
         self.assertEqual(res.status_code, 400)
 
         res = self.client.post('/createpost', json={
             'name': 'hello',
             'textt': 'lorem ipsum dolor sit amet',
-            'tags': ['linux', 'javascript']
+            'tags': ['Linux', 'JavaScript']
         })
         self.assertEqual(res.status_code, 400)
 
@@ -44,14 +44,14 @@ class TestCreatePost(unittest.TestCase):
         res = self.client.post('/createpost', json={
             'name': '',
             'text': 'lorem ipsum dolor sit amet',
-            'tags': ['linux', 'javascript']
+            'tags': ['Linux', 'JavaScript']
         })
         self.assertEqual(res.status_code, 400)
 
         res = self.client.post('/createpost', json={
             'name': 'hello',
             'text': '',
-            'tags': ['linux', 'javascript']
+            'tags': ['Linux', 'JavaScript']
         })
         self.assertEqual(res.status_code, 400)
 
@@ -64,7 +64,7 @@ class TestCreatePost(unittest.TestCase):
         res = self.client.post('/createpost', json={
             'name': 'What is Linux?',
             'text': 'lorem ipsum dolor sit amet',
-            'tags': ['linux', 'javascript']
+            'tags': ['Linux', 'JavaScript']
         })
         self.assertEqual(res.status_code, 200)
 
@@ -76,7 +76,7 @@ class TestCreatePost(unittest.TestCase):
         res = self.client.post('/createpost', json={
             'name': 'Lorem ipsum dolor sit amet',
             'text': 'lorem ipsum dolor sit amet',
-            'tags': ['linux', 'javascript']
+            'tags': ['Linux', 'JavaScript']
         })
         self.assertEqual(res.status_code, 200)
 

@@ -45,7 +45,7 @@ def create_post(request, session):
         endpoint = generate_endpoint_from_name(name, True)
 
     tags = [tag_instance for tag in tags if (tag_instance := session.query(
-        Tag).filter_by(endpoint=tag).first()) is not None]
+        Tag).filter_by(name=tag).first()) is not None]
 
     session.add(Post(
         name=name,

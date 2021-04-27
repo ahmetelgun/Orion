@@ -25,7 +25,7 @@ def posts(request, session):
     first_index = (page - 1) * int(os.getenv('POSTS_PER_PAGE'))
 
     if tag:
-        post_tag = session.query(Tag).filter_by(endpoint=tag).first()
+        post_tag = session.query(Tag).filter_by(name=tag).first()
         if post_tag:
             posts = session.query(Post)\
                 .filter(Post.tags.contains(post_tag))\
@@ -59,7 +59,7 @@ def posts(request, session):
             'endpoint': post.endpoint,
             'excerpt': post.excerpt,
             'author': post.author.name,
-            'tags': [{'name': tag.name, 'endpoint': tag.endpoint} for tag in post.tags]
+            'tags': [{'name': tag.name} for tag in post.tags]
         }
         data['data']['posts'].append(temp)
 

@@ -66,12 +66,12 @@ class TestPosts(unittest.TestCase):
         self.assertEqual(res.status_code, 200)
 
     def test_with_valid_tag(self):
-        res = self.client.get('/posts?tag=web_development')
+        res = self.client.get('/posts?tag=Web development')
         self.assertEqual(res.status_code, 200)
         data = res.json
         self.assertEqual(len(data['data']['posts']), 2)
 
-        res = self.client.get('/posts?tag=linux')
+        res = self.client.get('/posts?tag=Linux')
         self.assertEqual(res.status_code, 200)
         data = res.json
         self.assertEqual(len(data['data']['posts']), 2)
@@ -96,23 +96,23 @@ class TestPosts(unittest.TestCase):
         self.assertEqual(data['data']['current_page'], 2)
 
         # valid tag invalid page
-        res = self.client.get('/posts?page=a&tag=linux')
+        res = self.client.get('/posts?page=a&tag=Linux')
         self.assertEqual(res.status_code, 200)
         data = res.json
         self.assertEqual(data['data']['current_page'], 1)
 
-        res = self.client.get('/posts?page=&tag=web_development')
+        res = self.client.get('/posts?page=&tag=Web development')
         self.assertEqual(res.status_code, 200)
         data = res.json
         self.assertEqual(data['data']['current_page'], 1)
 
         # valid tag valid page
-        res = self.client.get('/posts?page=1&tag=linux')
+        res = self.client.get('/posts?page=1&tag=Linux')
         self.assertEqual(res.status_code, 200)
         data = res.json
         self.assertEqual(data['data']['current_page'], 1)
 
-        res = self.client.get('/posts?page=2&tag=post')
+        res = self.client.get('/posts?page=2&tag=Post')
         self.assertEqual(res.status_code, 200)
         data = res.json
         self.assertEqual(data['data']['current_page'], 2)

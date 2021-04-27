@@ -56,22 +56,18 @@ def create_test_data(session):
 
     tag1 = models.Tag(
         name='Web development',
-        endpoint='web_development'
     )
 
     tag2 = models.Tag(
         name='JavaScript',
-        endpoint='javascript'
     )
 
     tag3 = models.Tag(
         name='Linux',
-        endpoint='linux'
     )
 
     tag4 = models.Tag(
         name='Post',
-        endpoint='post'
     )
 
     post1 = models.Post(
