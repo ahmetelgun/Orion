@@ -78,5 +78,12 @@ def create_tag():
     return resp
 
 
+@app.route('/deletetag', methods=['POST'])
+def delete_tag():
+    resp = controllers.delete_tag(request, session)
+    session.close()
+    return resp
+
+
 if __name__ == "__main__":
     app.run()

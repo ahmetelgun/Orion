@@ -6,3 +6,4 @@ from .createpost_controller import create_post
 from .editpost_controller import editpost
 from .deletepost_controller import deletepost
 from .createtag_controller import create_tag
+from .deletetag_controller import delete_tag
