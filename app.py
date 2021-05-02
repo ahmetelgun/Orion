@@ -14,6 +14,8 @@ session = create_session(os.getenv('DATABASE_URL'))
 @app.after_request
 def apply_caching(response):
     response.headers["Access-Control-Allow-Origin"] = os.getenv('FRONTEND_URL')
+    response.headers["Access-Control-Allow-Headers"] = "content-type"
+    response.headers["Access-Control-Allow-Credentials"] = "true"
     return response
 
 

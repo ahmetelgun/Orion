@@ -16,30 +16,28 @@ def create_session(DATABASE_URL):
 
 
 def create_token_cookie(cookie=None):
-    if cookie:
-        return [
-            {
-                'key': 'login',
-                'value': 'true',
-                'max_age': 60*60*24*2,
-                'httponly': False,
-                'secure': True,
-                'path': '/',
-                'domain': os.getenv('FRONTEND_URL'),
-                'samesite': 'Strict',
-            },
-            {
-                'key': 'token',
-                'value': cookie,
-                'max_age': 60*60*24*2,
-                'httponly': True,
-                'secure': True,
-                'path': '/',
-                'domain': os.getenv('FRONTEND_URL'),
-                'samesite': 'Strict',
-            }
-        ]
-    return []
+    return [
+        {
+            'key': 'login',
+            'value': "true" if cookie else "false",
+            'max_age': 60*60*24*2,
+            'httponly': False,
+            'secure': True,
+            'path': '/',
+            'domain': os.getenv('FRONTEND_DOMAIN'),
+            'samesite': 'Strict',
+        },
+        {
+            'key': 'token',
+            'value': cookie if cookie else "",
+            'max_age': 60*60*24*2,
+            'httponly': True,
+            'secure': True,
+            'path': '/',
+            'domain': os.getenv('FRONTEND_DOMAIN'),
+            'samesite': 'Strict',
+        }
+    ]
 
 
 def response(data, return_code, cookies=[]):
